@@ -50,46 +50,47 @@ if (slider_for_event){
 
 class ToolBarNew{
 	constructor(){
+		this.moverBox = document.createElement('div');
 		this.toolBox = document.createElement('div');
 	}
 
 	outerBox(){
-		console.log('outer - box');
+		this.moverBox.style.padding = '5px';
+		this.moverBox.style.backgroundColor = 'rgba(0,0,0,0.5)';
+		this.moverBox.display = 'flex';
+		
 		this.toolBox.style.backgroundColor = 'rgba(244,244,244,1)';
 		this.toolBox.id = 'tool-box';
 		this.toolBox.style.position = 'absolute';
 		this.toolBox.style.zIndex = '5';
 		this.toolBox.style.display = 'flex';
 		this.toolBox.style.justifyContent = 'space-between';
-		this.toolBox.style.width = '50px';
-		this.toolBox.style.height = '50px';
 		this.toolBox.style.border = '1px solid';
 		//this.toolBox.style.display = 'flex';
+		//this.moverBox.appendChild(this.toolBox);
+		this.toolBox.appendChild(this.moverBox);
 		return this.toolBox;
 	}
 
 	outerBoxMove(){
-		console.log('Moving...');
 		let isDragging = false;
 		let offsetX = '500';
 		let offsetY = '500'
 
 		this.toolBox.addEventListener('mousedown', (e)=>{
 			e.preventDefault();
-			console.log('Started moving ..')
 			isDragging = true;
 			offsetX = e.clientX - this.toolBox.offsetLeft;
 			offsetY = e.clientY - this.toolBox.offsetTop;
 		});
 
-		this.toolBox.addEventListener('mousemove', (e)=>{
-			console.log(isDragging);
-			console.log();
+		document.addEventListener('mousemove', (e)=>{
 			if (isDragging){
 				let x = e.clientX - offsetX;
 				let y = e.clientY - offsetY;
-				this.toolBox.style.top = `${x}px`;
-				this.toolBox.style.left = `${y}px`;
+
+				this.toolBox.style.top = `${y}px`;
+				this.toolBox.style.left = `${x}px`;
 			}
 		});
 
@@ -98,10 +99,101 @@ class ToolBarNew{
 		});
 	}
 
+	canvasOpacityController(){
+		const slider_container = document.createElement('div');
+		const input_slider = document.createElement('input');
+		slider_container.appendChild(input_slider);
+		input_slider.type = 'range';
+		input_slider.id = "slider";
+		input_slider.min = '0.0';
+		input_slider.max = '1.0';
+		input_slider.step = '0.1';
+		input_slider.value = '0.5';
+		input_slider.style.zIndex = '2';
+		slider_container.style.backgroundColor = '#fff';
+		slider_container.style.position = 'absolute';
+		slider_container.style.zIndex = '5';
+		return slider_container;
+	}
+
+	penTool(){
+		const pen_container = document.createElement('div');
+		const pen_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-pen';
+		icon.style.fontSize = '25px';
+	
+		pen_button.appendChild(icon);
+		pen_container.appendChild(pen_button);
+		this.toolBox.appendChild(pen_container);
+		return pen_container;
+	}
+
+	toolContainer(){
+		const container = document.createElement('div');
+		
+		return container;
+	}
+
+	squareTool(){
+		let square_container = document.createElement('div');
+		const square_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-square';
+		icon.style.fontSize = '25px';
+
+		square_button.appendChild(icon);
+		square_container.appendChild(square_button);
+		this.toolBox.appendChild(square_container);
+		return square_container;
+	}
 
 
+	circleTool(){
+		let circle_container = document.createElement('div');
+		const square_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-circle';
+		icon.style.fontSize = '25px';
+
+		square_button.appendChild(icon);
+		circle_container.appendChild(square_button);
+		this.toolBox.appendChild(circle_container);
+		return circle_container;
+	}
+
+	hexagonTool(){
+		let hexagon_container = document.createElement('div');
+		const square_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-hexagon';
+		icon.style.fontSize = '25px';
+
+		square_button.appendChild(icon);
+		hexagon_container.appendChild(square_button);
+		this.toolBox.appendChild(hexagon_container);
+		return hexagon_container;
+	}
+
+	triangleTool(){
+		let triangle_container = document.createElement('div');
+		const square_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-triangle';
+		icon.style.fontSize = '25px';
+
+		square_button.appendChild(icon);
+		triangle_container.appendChild(square_button);
+		this.toolBox.appendChild(triangle_container);
+		return triangle_container;
+	}
 }
 
 let tool_box = new ToolBarNew();
+tool_box.penTool();
+tool_box.hexagonTool();
+tool_box.triangleTool();
+tool_box.circleTool();
 page.appendChild(tool_box.outerBox());
+
 tool_box.outerBoxMove();
