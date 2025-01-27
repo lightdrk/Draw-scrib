@@ -52,13 +52,14 @@ class ToolBarNew{
 	constructor(){
 		this.moverBox = document.createElement('div');
 		this.toolBox = document.createElement('div');
+		this.corner = document.createElement('div');
 	}
 
 	outerBox(){
 		this.moverBox.style.padding = '5px';
 		this.moverBox.style.backgroundColor = 'rgba(0,0,0,0.5)';
-		this.moverBox.display = 'flex';
-		
+		this.moverBox.style.cursor = 'move';
+		this.toolBox.style.flexDirection = 'column';
 		this.toolBox.style.backgroundColor = 'rgba(244,244,244,1)';
 		this.toolBox.id = 'tool-box';
 		this.toolBox.style.position = 'absolute';
@@ -66,7 +67,6 @@ class ToolBarNew{
 		this.toolBox.style.display = 'flex';
 		this.toolBox.style.justifyContent = 'space-between';
 		this.toolBox.style.border = '1px solid';
-		//this.toolBox.style.display = 'flex';
 		//this.moverBox.appendChild(this.toolBox);
 		this.toolBox.appendChild(this.moverBox);
 		return this.toolBox;
@@ -77,7 +77,7 @@ class ToolBarNew{
 		let offsetX = '500';
 		let offsetY = '500'
 
-		this.toolBox.addEventListener('mousedown', (e)=>{
+		this.moverBox.addEventListener('mousedown', (e)=>{
 			e.preventDefault();
 			isDragging = true;
 			offsetX = e.clientX - this.toolBox.offsetLeft;
@@ -123,6 +123,7 @@ class ToolBarNew{
 		icon.className = 'fa fa-pen';
 		icon.style.fontSize = '25px';
 	
+		icon.style.cursor = 'pointer';
 		pen_button.appendChild(icon);
 		pen_container.appendChild(pen_button);
 		this.toolBox.appendChild(pen_container);
@@ -142,6 +143,7 @@ class ToolBarNew{
 		icon.className = 'fa fa-square';
 		icon.style.fontSize = '25px';
 
+		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		square_container.appendChild(square_button);
 		this.toolBox.appendChild(square_container);
@@ -156,6 +158,7 @@ class ToolBarNew{
 		icon.className = 'fa fa-circle';
 		icon.style.fontSize = '25px';
 
+		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		circle_container.appendChild(square_button);
 		this.toolBox.appendChild(circle_container);
@@ -169,6 +172,7 @@ class ToolBarNew{
 		icon.className = 'fa fa-hexagon';
 		icon.style.fontSize = '25px';
 
+		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		hexagon_container.appendChild(square_button);
 		this.toolBox.appendChild(hexagon_container);
@@ -181,7 +185,7 @@ class ToolBarNew{
 		var icon = document.createElement('i');
 		icon.className = 'fa fa-triangle';
 		icon.style.fontSize = '25px';
-
+		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		triangle_container.appendChild(square_button);
 		this.toolBox.appendChild(triangle_container);
@@ -191,6 +195,7 @@ class ToolBarNew{
 
 let tool_box = new ToolBarNew();
 tool_box.penTool();
+tool_box.squareTool();
 tool_box.hexagonTool();
 tool_box.triangleTool();
 tool_box.circleTool();
