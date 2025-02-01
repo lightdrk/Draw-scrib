@@ -118,15 +118,28 @@ class ToolBarNew{
 
 	penTool(){
 		const pen_container = document.createElement('div');
+		pen_container.id = 'pen'
+		let update=false;
+		pen_container.addEventListener('click',()=>{
+			let x = document.getElementById('canvasid');
+			if (!update){
+				x.style.cursor = 'crosshair';
+				update = true;
+			}else{
+				x.style.cursor = 'auto';
+			}
+		});
 		const pen_button = document.createElement('button');
 		var icon = document.createElement('i');
 		icon.className = 'fa fa-pen';
 		icon.style.fontSize = '25px';
-	
+
 		icon.style.cursor = 'pointer';
 		pen_button.appendChild(icon);
 		pen_container.appendChild(pen_button);
 		this.toolBox.appendChild(pen_container);
+		
+
 		return pen_container;
 	}
 
@@ -191,6 +204,15 @@ class ToolBarNew{
 		this.toolBox.appendChild(triangle_container);
 		return triangle_container;
 	}
+
+	colorBox(){
+		let colorBoxDiv = document.createElement('div');
+		const colorInput = document.createElement('input');
+		colorInput.setAttribute('type', 'color');
+		colorBoxDiv.appendChild(colorInput);
+		this.toolBox.appendChild(colorBoxDiv);
+		return colorBoxDiv;
+	}
 }
 
 let tool_box = new ToolBarNew();
@@ -199,6 +221,7 @@ tool_box.squareTool();
 tool_box.hexagonTool();
 tool_box.triangleTool();
 tool_box.circleTool();
+tool_box.colorBox();
 page.appendChild(tool_box.outerBox());
 
 tool_box.outerBoxMove();
