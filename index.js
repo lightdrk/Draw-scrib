@@ -120,11 +120,36 @@ class ToolBarNew{
 		const pen_container = document.createElement('div');
 		pen_container.id = 'pen'
 		let update=false;
-		pen_container.addEventListener('click',()=>{
+
+		pen_container.addEventListener('click',() => {
 			let x = document.getElementById('canvasid');
 			if (!update){
+				let lastX = 0;
+				let lastY = 0;
+				let isDrawing = false;
+				let canvas = document.getElementById('canvasid');
+				console.log(canvas);
 				x.style.cursor = 'crosshair';
+				let ctx = canvas.getContext('2d');
 				update = true;
+				canvas.addEventListener('mousedown', (e)=>{
+					isDrawing = true;
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+				canvas.addEventListener('mouseup',()=>{
+					isDrawing = false;
+				});
+				canvas.addEventListener('mousemove', (e)=>{
+					if (!isDrawing) return;
+					console.log(lastX,lastY);
+					ctx.strokeStyle = 'rgba(255,255,255,1)';
+					ctx.beginPath();
+					ctx.moveTo(lastX,lastY);
+					ctx.lineTo(e.offsetX,e.offsetY);
+					ctx.stroke();
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+
 			}else{
 				x.style.cursor = 'auto';
 			}
@@ -139,7 +164,6 @@ class ToolBarNew{
 		pen_container.appendChild(pen_button);
 		this.toolBox.appendChild(pen_container);
 		
-
 		return pen_container;
 	}
 
@@ -213,7 +237,19 @@ class ToolBarNew{
 		this.toolBox.appendChild(colorBoxDiv);
 		return colorBoxDiv;
 	}
+
+	strokeBox(){
+		let strokeBoxDiv = document.createElement('div');
+		for (let x=0; x<30;x+10){
+			let stroke = document.createElement('div');
+			width
+		}
+
+	}
 }
+
+
+
 
 let tool_box = new ToolBarNew();
 tool_box.penTool();
