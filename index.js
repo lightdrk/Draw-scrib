@@ -128,9 +128,10 @@ class ToolBarNew{
 				let lastY = 0;
 				let isDrawing = false;
 				let canvas = document.getElementById('canvasid');
-				console.log(canvas);
 				x.style.cursor = 'crosshair';
 				let ctx = canvas.getContext('2d');
+				ctx.lineJoin = 'round';
+				ctx.lineCap = 'round';
 				update = true;
 				canvas.addEventListener('mousedown', (e)=>{
 					isDrawing = true;
@@ -141,7 +142,6 @@ class ToolBarNew{
 				});
 				canvas.addEventListener('mousemove', (e)=>{
 					if (!isDrawing) return;
-					console.log(lastX,lastY);
 					ctx.strokeStyle = 'rgba(255,255,255,1)';
 					ctx.beginPath();
 					ctx.moveTo(lastX,lastY);
@@ -240,12 +240,29 @@ class ToolBarNew{
 
 	strokeBox(){
 		let strokeBoxDiv = document.createElement('div');
-		for (let x=0; x<30;x+10){
+		strokeBoxDiv.style.display = 'flex';
+		strokeBoxDiv.style.alignItems = 'center';
+		strokeBoxDiv.style.justifyContent = 'space-between';
+		for (let x=5; x <= 20 ;x+=5){
 			let stroke = document.createElement('div');
-			width
-		}
+			stroke.style.width = `${x}px`;
+			stroke.style.height = `${x}px`;
+			stroke.style.cursor = 'pointer';
+			stroke.style.borderRadius = `50%`;
+			stroke.style.background = '#000';
+			stroke.addEventListener('click',()=>{
+				let canvas = document.getElementById('canvasid');
+				let ctx = canvas.getContext('2d');
+				ctx.lineWidth = `${x}`;
 
+			});
+			strokeBoxDiv.appendChild(stroke);
+		}
+		this.toolBox.appendChild(strokeBoxDiv);
+		return strokeBoxDiv;
 	}
+
+
 }
 
 
@@ -258,6 +275,7 @@ tool_box.hexagonTool();
 tool_box.triangleTool();
 tool_box.circleTool();
 tool_box.colorBox();
+tool_box.strokeBox();
 page.appendChild(tool_box.outerBox());
 
 tool_box.outerBoxMove();
