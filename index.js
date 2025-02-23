@@ -158,7 +158,6 @@ class ToolBarNew{
 		var icon = document.createElement('i');
 		icon.className = 'fa fa-pen';
 		icon.style.fontSize = '25px';
-
 		icon.style.cursor = 'pointer';
 		pen_button.appendChild(icon);
 		pen_container.appendChild(pen_button);
@@ -184,6 +183,31 @@ class ToolBarNew{
 		square_button.appendChild(icon);
 		square_container.appendChild(square_button);
 		this.toolBox.appendChild(square_container);
+		square_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'crosshair';
+				let lastX = 0;
+				let lastY = 0;
+				let isDrawing = false;
+				let ctx = canvas.getContext('2d');
+				ctx.lineJoin = 'round';
+				ctx.lineCap = 'round';
+				canvas.addEventListener('mousedown', (e)=>{
+					isDrawing = true;
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+				canvas.addEventListener('mouseup',()=>{
+					isDrawing = false;
+				});
+				canvas.addEventListener('mousemove', (e)=>{
+					if (!isDrawing) return;
+					ctx.strokeStyle = 'rgba(255,255,255,1)';
+					let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
+					ctx.rect(lastX, lastY, length, length, )
+					ctx.stroke();
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+		})
 		return square_container;
 	}
 
