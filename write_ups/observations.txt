@@ -1,0 +1,38 @@
+1). inaccuracy when drawing using pencil, on canvas 
+about:- when i was trying to draw something on canvas using pencil , 
+		it always had deviations like getting draw far from the point of click
+		both horizontally and vartically.
+observation:- when i removed the height: 100% and width 100% , it becomes accurate.
+answer:-  setting height and width does not chang resolution causing the issue of 
+			inaccuracy.
+solution:- changed the canvas.style.width / height to canvas.width and height with window.innerWidth
+			window.innerHeight removed the issue of inaccuracy, also removed the issue of pixilated draw.
+
+
+
+2). when drawing square it was spawning as i drag  
+about:- when i was trying to draw something on canvas using square , 
+		it would run along the line , draws along the line.
+observation:- was becuase i was drawing while dragging which was causing the issue
+answer:-  started drawing after mouse event mouse up is triggered removed the issue.
+
+
+3). Drawing Square?  
+about:- how to draw a square using cordinates on a plane . 
+observation:- i am using euclides formula with pythagores to get horizontal line to draw it.
+issue:- i am getting a square but it is always away from the end of the mouse point.
+
+
+
+3). Drawing Circle?  
+about:- how to draw a circle using cordinates on a plane . 
+observation:- i am using euclides formula to get distance between two points and using it as radius.
+issue:- i am getting a circle but it is always away from the end of the mouse point
+
+4). Working on undo ctrl + z?  
+about:- undo Changes by ctrl +z , removed the rect using clearRect function. 
+observation:-  issue is when i am ctrl +z it clears half of the rectangle and when i draw another rectangle it comes back.
+issue:- it is not clearing the rectangle , clear not clearing all one issue was with inaccuracy of float removed by flooring the 
+		floating point imprecision.
+
+

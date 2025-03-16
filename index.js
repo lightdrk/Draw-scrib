@@ -1,4 +1,5 @@
 const page = document.body;
+const HISTORY_STACK = []
 
 function canvas_element(){
 	const canvas = document.createElement('canvas');
@@ -7,8 +8,8 @@ function canvas_element(){
 	canvas.style.opacity = '0.5';
 	canvas.style.position = 'absolute';
 	canvas.style.zIndex = '1';
-	canvas.style.width = '100%';
-	canvas.style.height = '100%';
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
 	return canvas
 }
 
@@ -46,6 +47,10 @@ if (slider_for_event){
 		console.log(opacity);
 		canvas.style.opacity = ''+opacity;
 	})
+}
+
+function moveShape(){
+
 }
 
 class ToolBarNew{
@@ -135,7 +140,9 @@ class ToolBarNew{
 				update = true;
 				canvas.addEventListener('mousedown', (e)=>{
 					isDrawing = true;
-					[lastX, lastY] = [e.offsetX, e.offsetY]
+					ctx.beginPath();
+					console.log(e.offsetX, e.offsetY);
+					[lastX, lastY] = [e.offsetX, e.offsetY];
 				});
 				canvas.addEventListener('mouseup',()=>{
 					isDrawing = false;
@@ -143,9 +150,9 @@ class ToolBarNew{
 				canvas.addEventListener('mousemove', (e)=>{
 					if (!isDrawing) return;
 					ctx.strokeStyle = 'rgba(255,255,255,1)';
-					ctx.beginPath();
-					ctx.moveTo(lastX,lastY);
-					ctx.lineTo(e.offsetX,e.offsetY);
+
+					ctx.moveTo(lastX, lastY);
+					ctx.lineTo(e.offsetX, e.offsetY);
 					ctx.stroke();
 					[lastX, lastY] = [e.offsetX, e.offsetY]
 				});
@@ -183,7 +190,9 @@ class ToolBarNew{
 		square_button.appendChild(icon);
 		square_container.appendChild(square_button);
 		this.toolBox.appendChild(square_container);
+		let isActive = false;
 		square_button.addEventListener('click',()=>{
+			isActive = !isActive
 			let canvas = document.getElementById('canvasid');
 			canvas.style.cursor = 'crosshair';
 				let lastX = 0;
@@ -196,16 +205,23 @@ class ToolBarNew{
 					isDrawing = true;
 					[lastX, lastY] = [e.offsetX, e.offsetY]
 				});
-				canvas.addEventListener('mouseup',()=>{
-					isDrawing = false;
-				});
-				canvas.addEventListener('mousemove', (e)=>{
+
+				canvas.addEventListener('mousemove', ()=>{
 					if (!isDrawing) return;
+				});
+
+				canvas.addEventListener('mouseup',(e)=>{
+					console.log(e.offsetX, lastX) 
+					console.log(e.offsetY, lastY)
 					ctx.strokeStyle = 'rgba(255,255,255,1)';
-					let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
-					ctx.rect(lastX, lastY, length, length, )
+					let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
+					ctx.rect(lastX, lastY, length, length)
 					ctx.stroke();
+					HISTORY_STACK.push([[length, length], [lastX, lastY]]);
+					console.log('the change ->',lastX, lastY);
 					[lastX, lastY] = [e.offsetX, e.offsetY]
+					console.log('the change ->',lastX, lastY);
+
 				});
 		})
 		return square_container;
@@ -223,6 +239,36 @@ class ToolBarNew{
 		square_button.appendChild(icon);
 		circle_container.appendChild(square_button);
 		this.toolBox.appendChild(circle_container);
+		circle_container.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'crosshair';
+				let lastX = 0;
+				let lastY = 0;
+				let isDrawing = false;
+				let ctx = canvas.getContext('2d');
+				ctx.lineJoin = 'round';
+				ctx.lineCap = 'round';
+				canvas.addEventListener('mousedown', (e)=>{
+					isDrawing = true;
+					ctx.beginPath();
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+
+				canvas.addEventListener('mousemove', ()=>{
+					if (!isDrawing) return;
+				});
+
+				canvas.addEventListener('mouseup',(e)=>{
+					console.log(e.offsetX, lastX); 
+					console.log(e.offsetY, lastY);
+					ctx.strokeStyle = 'rgba(255,255,255,1)';
+					let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
+					ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
+					ctx.stroke();
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+
+				});
+		})
 		return circle_container;
 	}
 
@@ -286,10 +332,67 @@ class ToolBarNew{
 		return strokeBoxDiv;
 	}
 
+	moveTool(){
+		let square_container = document.createElement('div');
+		const square_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-arrows';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		square_button.appendChild(icon);
+		square_container.appendChild(square_button);
+		this.toolBox.appendChild(square_container);
+		square_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'move';
+				let lastX = 0;
+				let lastY = 0;
+				let isDrawing = false;
+				let ctx = canvas.getContext('2d');
+				ctx.lineJoin = 'round';
+				ctx.lineCap = 'round';
+				canvas.addEventListener('mousedown', (e)=>{
+					isDrawing = true;
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+
+				canvas.addEventListener('mousemove', ()=>{
+					if (!isDrawing) return;
+				});
+
+				canvas.addEventListener('mouseup',(e)=>{
+					console.log(e.offsetX, lastX) 
+					console.log(e.offsetY, lastY)
+					ctx.strokeStyle = 'rgba(255,255,255,1)';
+					let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
+					console.log(length)
+					ctx.rect(lastX, lastY, length, length)
+					ctx.stroke();
+					[lastX, lastY] = [e.offsetX, e.offsetY]
+				});
+		})
+		return square_container;
+	}
+
 
 }
 
+document.addEventListener('keydown', (event)=>{
+	if ((event.ctrlKey || event.metaKey) && event.key === 'z'){
+		let canvas = document.getElementById('canvasid');
+		canvas.style.cursor = 'crosshair';
+		let ctx = canvas.getContext('2d');
+		console.log(HISTORY_STACK);
+		[lengths, cord] = HISTORY_STACK.pop();
+		console.log(lengths);
+		console.log(cord);
 
+		ctx.clearRect(cord[0],cord[1], lengths[0], lengths[1]);
+
+		ctx.clearRect(cord[0],cord[1], lengths[0], lengths[1]);
+	}
+});
 
 
 let tool_box = new ToolBarNew();
@@ -299,6 +402,7 @@ tool_box.hexagonTool();
 tool_box.triangleTool();
 tool_box.circleTool();
 tool_box.colorBox();
+tool_box.moveTool();
 tool_box.strokeBox();
 page.appendChild(tool_box.outerBox());
 
