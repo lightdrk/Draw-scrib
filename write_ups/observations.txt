@@ -46,4 +46,10 @@ solution:- worked, solution for this was using ctx.beiginPath() and ctx.closePat
 reference:- https://codetheory.in/why-clearrect-might-not-be-clearing-canvas-pixels/
 
 
+6). Moving the drawing?  
+about:- moving drawing on clicking the canvas or image. 
+observation:- on click of mouse get the nearest drawing for moving.
+solution:- creating priority que to get closest drawing using priority que from the cordinates.
+			getting all the drawing from the history stack;
+
 

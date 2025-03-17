@@ -1,3 +1,4 @@
+const pq = require('./utils/priorityQue');
 const page = document.body;
 const HISTORY_STACK = [];
 const REDO_STACK = [];
@@ -104,6 +105,7 @@ class ToolBarNew{
 			isDragging = false;
 		});
 	}
+
 
 	canvasOpacityController(){
 		const slider_container = document.createElement('div');
@@ -251,7 +253,8 @@ class ToolBarNew{
 				ctx.lineCap = 'round';
 				canvas.addEventListener('mousedown', (e)=>{
 					isDrawing = true;
-					ctx.beginPath();
+					ctx.beginPath();					console.log(e.offsetX, lastX) 
+
 					[lastX, lastY] = [e.offsetX, e.offsetY]
 				});
 
@@ -354,7 +357,14 @@ class ToolBarNew{
 				ctx.lineJoin = 'round';
 				ctx.lineCap = 'round';
 				canvas.addEventListener('mousedown', (e)=>{
+					//when this is clicked it will get the info of 
+					//the drawing nearest to it 
+					//TODO:- complete priority que 
 					isDrawing = true;
+					let proximity = new pq();//min heap priority que
+					for (let drawing of HISTORY_STACK){
+						proximity.push(drawing);
+					}
 					[lastX, lastY] = [e.offsetX, e.offsetY]
 				});
 
@@ -376,7 +386,6 @@ class ToolBarNew{
 		return square_container;
 	}
 
-
 }
 
 document.addEventListener('keydown', (event)=>{
@@ -397,7 +406,6 @@ document.addEventListener('keydown', (event)=>{
 		let ctx = canvas.getContext('2d');
 		[lengths, cord] = REDO_STACK.pop();
 		HISTORY_STACK.push([lengths, cord])
-		console.log(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
 		ctx.clearRect(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
 
 	}
