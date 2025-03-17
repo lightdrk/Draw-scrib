@@ -1,5 +1,6 @@
 const page = document.body;
-const HISTORY_STACK = []
+const HISTORY_STACK = [];
+const REDO_STACK = [];
 
 function canvas_element(){
 	const canvas = document.createElement('canvas');
@@ -213,14 +214,14 @@ class ToolBarNew{
 				canvas.addEventListener('mouseup',(e)=>{
 					console.log(e.offsetX, lastX) 
 					console.log(e.offsetY, lastY)
+					ctx.beginPath();
 					ctx.strokeStyle = 'rgba(255,255,255,1)';
 					let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
 					ctx.rect(lastX, lastY, length, length)
 					ctx.stroke();
+					ctx.closePath();
 					HISTORY_STACK.push([[length, length], [lastX, lastY]]);
-					console.log('the change ->',lastX, lastY);
 					[lastX, lastY] = [e.offsetX, e.offsetY]
-					console.log('the change ->',lastX, lastY);
 
 				});
 		})
@@ -385,12 +386,20 @@ document.addEventListener('keydown', (event)=>{
 		let ctx = canvas.getContext('2d');
 		console.log(HISTORY_STACK);
 		[lengths, cord] = HISTORY_STACK.pop();
-		console.log(lengths);
-		console.log(cord);
+		REDO_STACK.push([lengths, cord])
+		ctx.clearRect(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
 
-		ctx.clearRect(cord[0],cord[1], lengths[0], lengths[1]);
+	}
 
-		ctx.clearRect(cord[0],cord[1], lengths[0], lengths[1]);
+	if ((event.ctrlKey || event.metaKey) && event.key === 'u'){
+		let canvas = document.getElementById('canvasid');
+		canvas.style.cursor = 'crosshair';
+		let ctx = canvas.getContext('2d');
+		[lengths, cord] = REDO_STACK.pop();
+		HISTORY_STACK.push([lengths, cord])
+		console.log(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
+		ctx.clearRect(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
+
 	}
 });
 

@@ -34,5 +34,16 @@ about:- undo Changes by ctrl +z , removed the rect using clearRect function.
 observation:-  issue is when i am ctrl +z it clears half of the rectangle and when i draw another rectangle it comes back.
 issue:- it is not clearing the rectangle , clear not clearing all one issue was with inaccuracy of float removed by flooring the 
 		floating point imprecision.
+solution:- worked when i inceased the area and decreased the cordinates.
+
+
+5). Working on undo ctrl + z?  
+about:- undo Changes by ctrl +z , removed the rect using clearRect function . 
+observation:- when i draw another rectangle it comes back.
+solution:- worked, solution for this was using ctx.beiginPath() and ctx.closePath(), when we are not using ctx.beginPath()
+			when ever stroke is called it redraws everything available in the memory stack meaning every drawing done without
+			BEGIN PATH .
+reference:- https://codetheory.in/why-clearrect-might-not-be-clearing-canvas-pixels/
+
 
 
