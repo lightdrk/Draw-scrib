@@ -1,9 +1,6 @@
 class PriorityQueue{
-	//complete priority ques
-	constructor(x, y) {
+	constructor() {
 		this.root = [];
-		this.cordX = x;
-		this.cordY = y;
 	}
 
 	parent(idx){
@@ -19,10 +16,11 @@ class PriorityQueue{
 	}
 
 	heapify_up(idx){
-		while (idx>0 && this.root[idx] < this.root[this.parent(idx)]){
+		while (idx>0 && this.root[idx].near < this.root[this.parent(idx)].near){
 			let val = this.root[idx];
 			this.root[idx] = this.root[this.parent(idx)];
 			this.root[this.parent(idx)] = val;
+			idx = this.parent(idx);
 		}
 	}
 
@@ -31,10 +29,10 @@ class PriorityQueue{
 		let right = this.right(idx);
 		let smallest = idx
 		let length = this.root.length;
-		if (left < length && this.root[idx] > this.root[left]){
+		if (left < length && this.root[idx].near > this.root[left].near){
 			smallest = left;
 		}
-		if (right < length && this.root[smallest] > this.root[right]){
+		if (right < length && this.root[smallest].near > this.root[right].near){
 			smallest = right
 		}
 		if (smallest != idx){
@@ -53,7 +51,9 @@ class PriorityQueue{
 	pop(){
 		let val = this.root.pop();
 		if (this.root.length > 0){
-			this.root[0], val = val, this.root[0];
+			let swap = this.root[0]
+			this.root[0] = val
+			val = swap;
 			this.heapify_down(0);
 		}
 		return val;
@@ -63,3 +63,9 @@ class PriorityQueue{
 		return this.root[0];
 	}
 }
+
+
+
+
+
+

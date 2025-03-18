@@ -52,4 +52,6 @@ observation:- on click of mouse get the nearest drawing for moving.
 solution:- creating priority que to get closest drawing using priority que from the cordinates.
 			getting all the drawing from the history stack;
 
+7).bug:- moving the drawing cretes new drawing?
+about:- moving drawing from one place another creates new shape. 
 

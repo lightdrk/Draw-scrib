@@ -1,4 +1,80 @@
-const pq = require('./utils/priorityQue');
+//const pq = require('./utils/priorityQue');
+//
+//
+//
+class PriorityQueue{
+	//complete priority ques
+	constructor() {
+		this.root = [];
+	}
+
+	parent(idx){
+		return (idx-1)>>1;
+	}
+
+	left(idx){
+		return (idx<<1)+1;
+	}
+
+	right(idx){
+		return (idx<<1)+2;
+	}
+
+	heapify_up(idx){
+		while (idx>0 && this.root[idx].near < this.root[this.parent(idx)].near){
+			let val = this.root[idx];
+			this.root[idx] = this.root[this.parent(idx)];
+			this.root[this.parent(idx)] = val;
+			idx = this.parent(idx);
+		}
+	}
+
+	heapify_down(idx){
+		let left = this.left(idx);
+		let right = this.right(idx);
+		let smallest = idx
+		let length = this.root.length;
+		if (left < length && this.root[idx].near > this.root[left].near){
+			smallest = left;
+		}
+		if (right < length && this.root[smallest].near > this.root[right].near){
+			smallest = right
+		}
+		if (smallest != idx){
+			let val = this.root[smallest];
+			this.root[smallest] = this.root[idx]
+			this.root[idx] = val
+			this.heapify_down(smallest);
+		}
+	}
+
+	push(val){
+		this.root.push(val);
+		this.heapify_up(this.root.length-1);
+	}
+
+	pop(){
+		let val = this.root.pop();
+		if (this.root.length > 0){
+			let swap = this.root[0]
+			this.root[0] = val
+			val = swap;
+			this.heapify_down(0);
+		}
+		return val;
+	}
+
+	peek(){
+		return this.root[0];
+	}
+}
+
+
+function distance(x1,y1, x2,y2){
+	return (x2-x1)**2 + (y2-y1)**2;
+
+}
+
 const page = document.body;
 const HISTORY_STACK = [];
 const REDO_STACK = [];
@@ -49,10 +125,6 @@ if (slider_for_event){
 		console.log(opacity);
 		canvas.style.opacity = ''+opacity;
 	})
-}
-
-function moveShape(){
-
 }
 
 class ToolBarNew{
@@ -172,13 +244,13 @@ class ToolBarNew{
 		pen_button.appendChild(icon);
 		pen_container.appendChild(pen_button);
 		this.toolBox.appendChild(pen_container);
-		
+
 		return pen_container;
 	}
 
 	toolContainer(){
 		const container = document.createElement('div');
-		
+
 		return container;
 	}
 
@@ -194,38 +266,54 @@ class ToolBarNew{
 		square_container.appendChild(square_button);
 		this.toolBox.appendChild(square_container);
 		let isActive = false;
+
+		let lastX = 0;
+		let lastY = 0;
+		let isDrawing = false;
+
+		let canvas = document.getElementById('canvasid');
+		let ctx = canvas.getContext('2d');
+		const mouseDown = (e) =>{
+			isDrawing = true;
+			isActive = true;
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		};
+
+		const mouseMove = (e) =>{
+			if (!isDrawing) return;
+		};
+
+		const mouseUp = (e) =>{
+			ctx.beginPath();
+			ctx.strokeStyle = 'rgba(255,255,255,1)';
+			let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
+			ctx.rect(lastX, lastY, length, length)
+			ctx.stroke();
+			ctx.closePath();
+			HISTORY_STACK.push({length, x: lastX, y: lastY});
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		};
+
 		square_button.addEventListener('click',()=>{
-			isActive = !isActive
-			let canvas = document.getElementById('canvasid');
+
 			canvas.style.cursor = 'crosshair';
-				let lastX = 0;
-				let lastY = 0;
-				let isDrawing = false;
-				let ctx = canvas.getContext('2d');
-				ctx.lineJoin = 'round';
-				ctx.lineCap = 'round';
-				canvas.addEventListener('mousedown', (e)=>{
-					isDrawing = true;
-					[lastX, lastY] = [e.offsetX, e.offsetY]
-				});
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
 
-				canvas.addEventListener('mousemove', ()=>{
-					if (!isDrawing) return;
-				});
+			if (!isActive){
+				isActive = true;
+				console.log('adding event listener');
+				canvas.addEventListener('mousedown', mouseDown);
+				canvas.addEventListener('mousemove', mouseMove);
+				canvas.addEventListener('mouseup', mouseUp);
 
-				canvas.addEventListener('mouseup',(e)=>{
-					console.log(e.offsetX, lastX) 
-					console.log(e.offsetY, lastY)
-					ctx.beginPath();
-					ctx.strokeStyle = 'rgba(255,255,255,1)';
-					let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
-					ctx.rect(lastX, lastY, length, length)
-					ctx.stroke();
-					ctx.closePath();
-					HISTORY_STACK.push([[length, length], [lastX, lastY]]);
-					[lastX, lastY] = [e.offsetX, e.offsetY]
+			}else{
+				canvas.style.cursor = 'pointer';
+				canvas.removeEventListener('mousedown', mouseDown);
+				canvas.removeEventListener('mousemove', mouseMove);
+				canvas.removeEventListener('mouseup', mouseUp);
+			}
 
-				});
 		})
 		return square_container;
 	}
@@ -245,33 +333,34 @@ class ToolBarNew{
 		circle_container.addEventListener('click',()=>{
 			let canvas = document.getElementById('canvasid');
 			canvas.style.cursor = 'crosshair';
-				let lastX = 0;
-				let lastY = 0;
-				let isDrawing = false;
-				let ctx = canvas.getContext('2d');
-				ctx.lineJoin = 'round';
-				ctx.lineCap = 'round';
-				canvas.addEventListener('mousedown', (e)=>{
-					isDrawing = true;
-					ctx.beginPath();					console.log(e.offsetX, lastX) 
+			let lastX = 0;
+			let lastY = 0;
+			let isDrawing = false;
+			let ctx = canvas.getContext('2d');
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			canvas.addEventListener('mousedown', (e)=>{
+				isDrawing = true;
+				ctx.beginPath();
+				console.log(e.offsetX, lastX) 
 
-					[lastX, lastY] = [e.offsetX, e.offsetY]
-				});
+				[lastX, lastY] = [e.offsetX, e.offsetY]
+			});
 
-				canvas.addEventListener('mousemove', ()=>{
-					if (!isDrawing) return;
-				});
+			canvas.addEventListener('mousemove', ()=>{
+				if (!isDrawing) return;
+			});
 
-				canvas.addEventListener('mouseup',(e)=>{
-					console.log(e.offsetX, lastX); 
-					console.log(e.offsetY, lastY);
-					ctx.strokeStyle = 'rgba(255,255,255,1)';
-					let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
-					ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
-					ctx.stroke();
-					[lastX, lastY] = [e.offsetX, e.offsetY]
+			canvas.addEventListener('mouseup',(e)=>{
+				console.log(e.offsetX, lastX); 
+				console.log(e.offsetY, lastY);
+				ctx.strokeStyle = 'rgba(255,255,255,1)';
+				let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
+				ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
+				ctx.stroke();
+				[lastX, lastY] = [e.offsetX, e.offsetY]
 
-				});
+			});
 		})
 		return circle_container;
 	}
@@ -294,12 +383,61 @@ class ToolBarNew{
 		let triangle_container = document.createElement('div');
 		const square_button = document.createElement('button');
 		var icon = document.createElement('i');
-		icon.className = 'fa fa-triangle';
+		icon.className = 'fa fa-caret-up';
 		icon.style.fontSize = '25px';
 		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		triangle_container.appendChild(square_button);
 		this.toolBox.appendChild(triangle_container);
+		let isActive = false;
+		let lastX = 0;
+		let lastY = 0;
+		let isDrawing = false;
+
+		let canvas = document.getElementById('canvasid');
+		let ctx = canvas.getContext('2d');
+		const mouseDown = (e) =>{
+			isDrawing = true;
+			isActive = true;
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		};
+
+		const mouseMove = (e) =>{
+			if (!isDrawing) return;
+		};
+
+		const mouseUp = (e) =>{
+			ctx.beginPath();
+			ctx.strokeStyle = 'rgba(255,255,255,1)';
+			let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
+			ctx.rect(lastX, lastY, length, length)
+			ctx.stroke();
+			ctx.closePath();
+			HISTORY_STACK.push({length, x: lastX, y: lastY});
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		};
+
+		square_button.addEventListener('click',()=>{
+
+			canvas.style.cursor = 'crosshair';
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+
+			if (!isActive){
+				isActive = true;
+				console.log('adding event listener');
+				canvas.addEventListener('mousedown', mouseDown);
+				canvas.addEventListener('mousemove', mouseMove);
+				canvas.addEventListener('mouseup', mouseUp);
+
+			}else{
+				canvas.style.cursor = 'pointer';
+				canvas.removeEventListener('mousedown', mouseDown);
+				canvas.removeEventListener('mousemove', mouseMove);
+				canvas.removeEventListener('mouseup', mouseUp);
+			}
+
+		})
 		return triangle_container;
 	}
 
@@ -338,50 +476,68 @@ class ToolBarNew{
 
 	moveTool(){
 		let square_container = document.createElement('div');
-		const square_button = document.createElement('button');
+		const move_button = document.createElement('button');
 		var icon = document.createElement('i');
 		icon.className = 'fa fa-arrows';
 		icon.style.fontSize = '25px';
 
 		icon.style.cursor = 'pointer';
-		square_button.appendChild(icon);
-		square_container.appendChild(square_button);
+		move_button.appendChild(icon);
+		square_container.appendChild(move_button);
 		this.toolBox.appendChild(square_container);
-		square_button.addEventListener('click',()=>{
+		move_button.addEventListener('click',()=>{
 			let canvas = document.getElementById('canvasid');
 			canvas.style.cursor = 'move';
-				let lastX = 0;
-				let lastY = 0;
-				let isDrawing = false;
-				let ctx = canvas.getContext('2d');
-				ctx.lineJoin = 'round';
-				ctx.lineCap = 'round';
-				canvas.addEventListener('mousedown', (e)=>{
-					//when this is clicked it will get the info of 
-					//the drawing nearest to it 
-					//TODO:- complete priority que 
-					isDrawing = true;
-					let proximity = new pq();//min heap priority que
-					for (let drawing of HISTORY_STACK){
-						proximity.push(drawing);
-					}
-					[lastX, lastY] = [e.offsetX, e.offsetY]
-				});
 
-				canvas.addEventListener('mousemove', ()=>{
-					if (!isDrawing) return;
-				});
+			let proximity_arr = new PriorityQueue();//min heap priority que
+			let proximity = null;
+			let lastX = 0;
+			let lastY = 0;
+			let isDrawing = false;
+			let ctx = canvas.getContext('2d');
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			let mouseDown = (e) => {
+				//when this is clicked it will get the info of 
+				//the drawing nearest to it 
+				//TODO:- complete priority que 
+				let x = e.offsetX;
+				let y = e.offsetY;
+				isDrawing = true;
+				for (let drawing of HISTORY_STACK){
+					let near = distance(x,y, drawing.x, drawing.y) 
+					drawing['near'] = near
+					proximity_arr.push(drawing);
+				}
+				let shape_params = proximity_arr.pop();
+				proximity = shape_params;
+				ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
+				ctx.beginPath();
+				ctx.rect(x, y, shape_params.length, shape_params.length);
+				ctx.stroke();
+				ctx.closePath();
+				[lastX, lastY] = [x, y];
+			};
+			let mouseMove = (e) => {
+				if (!proximity) return;
+				ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
+				ctx.beginPath();
+				ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
+				ctx.stroke();
+				ctx.closePath();
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+			};
+			canvas.addEventListener('mousedown', mouseDown);
 
-				canvas.addEventListener('mouseup',(e)=>{
-					console.log(e.offsetX, lastX) 
-					console.log(e.offsetY, lastY)
-					ctx.strokeStyle = 'rgba(255,255,255,1)';
-					let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
-					console.log(length)
-					ctx.rect(lastX, lastY, length, length)
-					ctx.stroke();
-					[lastX, lastY] = [e.offsetX, e.offsetY]
-				});
+			canvas.addEventListener('mousemove', mouseMove);
+
+			canvas.addEventListener('mouseup',(e)=>{
+				canvas.removeEventListener('mousemove', mouseMove);
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+				proximity.x = lastX;
+				proximity.y = lastY;
+				HISTORY_STACK.push(proximity);
+			});
 		})
 		return square_container;
 	}
@@ -394,9 +550,9 @@ document.addEventListener('keydown', (event)=>{
 		canvas.style.cursor = 'crosshair';
 		let ctx = canvas.getContext('2d');
 		console.log(HISTORY_STACK);
-		[lengths, cord] = HISTORY_STACK.pop();
-		REDO_STACK.push([lengths, cord])
-		ctx.clearRect(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
+		let object = HISTORY_STACK.pop();
+		REDO_STACK.push(object)
+		ctx.clearRect(object.x - 1, object.y - 1, object.length + 1, object.length + 1);
 
 	}
 
