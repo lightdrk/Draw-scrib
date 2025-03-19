@@ -53,5 +53,10 @@ solution:- creating priority que to get closest drawing using priority que from 
 			getting all the drawing from the history stack;
 
 7).bug:- moving the drawing cretes new drawing?
-about:- moving drawing from one place another creates new shape. 
+about:- moving drawing from one place another creates new shape.
+observation:- might be because i am not properly handling closing of one option.
 
+
+8). Removing anything is possible now eraser is working
+about:- remove in certain area
+observation:- creating an area of 20 by default then adding moving and down event to mouse to achive moving erase.

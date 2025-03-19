@@ -200,40 +200,46 @@ class ToolBarNew{
 		const pen_container = document.createElement('div');
 		pen_container.id = 'pen'
 		let update=false;
+		let lastX = 0;
+		let lastY = 0;
+		let isDrawing = false;
+		let mouseDown = (e)=>{
+			isDrawing = true;
+			ctx.beginPath();
+			console.log(e.offsetX, e.offsetY);
+			[lastX, lastY] = [e.offsetX, e.offsetY];
+		}
 
+		let mouseMove = (e)=>{
+			if (!isDrawing) return;
+			ctx.strokeStyle = 'rgba(255,255,255,1)';
+			ctx.moveTo(lastX, lastY);
+			ctx.lineTo(e.offsetX, e.offsetY);
+			ctx.stroke();
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		}
+
+		let x = document.getElementById('canvasid');
+
+		let canvas = document.getElementById('canvasid');
+		x.style.cursor = 'crosshair';
+		let ctx = canvas.getContext('2d');
+		ctx.lineJoin = 'round';
+		ctx.lineCap = 'round';
 		pen_container.addEventListener('click',() => {
-			let x = document.getElementById('canvasid');
 			if (!update){
-				let lastX = 0;
-				let lastY = 0;
-				let isDrawing = false;
-				let canvas = document.getElementById('canvasid');
-				x.style.cursor = 'crosshair';
-				let ctx = canvas.getContext('2d');
-				ctx.lineJoin = 'round';
-				ctx.lineCap = 'round';
-				update = true;
-				canvas.addEventListener('mousedown', (e)=>{
-					isDrawing = true;
-					ctx.beginPath();
-					console.log(e.offsetX, e.offsetY);
-					[lastX, lastY] = [e.offsetX, e.offsetY];
-				});
-				canvas.addEventListener('mouseup',()=>{
-					isDrawing = false;
-				});
-				canvas.addEventListener('mousemove', (e)=>{
-					if (!isDrawing) return;
-					ctx.strokeStyle = 'rgba(255,255,255,1)';
 
-					ctx.moveTo(lastX, lastY);
-					ctx.lineTo(e.offsetX, e.offsetY);
-					ctx.stroke();
-					[lastX, lastY] = [e.offsetX, e.offsetY]
-				});
+				update = true;
+
+				update = true;
+				canvas.addEventListener('mousedown', mouseDown);
+				canvas.addEventListener('mousemove', mouseMove);
 
 			}else{
 				x.style.cursor = 'auto';
+				canvas.removeEventListener('mousedown', mouseDown);
+				canvas.removeEventListener('mousemove', mouseMove);
+
 			}
 		});
 		const pen_button = document.createElement('button');
@@ -474,6 +480,179 @@ class ToolBarNew{
 		return strokeBoxDiv;
 	}
 
+
+	arrowsTool(){
+		let square_container = document.createElement('div');
+		const arrows_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-arrows-h';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		arrows_button.appendChild(icon);
+		square_container.appendChild(arrows_button);
+		this.toolBox.appendChild(square_container);
+		arrows_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'move';
+
+			let proximity_arr = new PriorityQueue();//min heap priority que
+			let proximity = null;
+			let lastX = 0;
+			let lastY = 0;
+			let isDrawing = false;
+			let ctx = canvas.getContext('2d');
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			let mouseDown = (e) => {
+				//when this is clicked it will get the info of 
+				//the drawing nearest to it 
+				//TODO:- complete priority que 
+				let x = e.offsetX;
+				let y = e.offsetY;
+				isDrawing = true;
+				for (let drawing of HISTORY_STACK){
+					let near = distance(x,y, drawing.x, drawing.y) 
+					drawing['near'] = near
+					proximity_arr.push(drawing);
+				}
+				let shape_params = proximity_arr.pop();
+				proximity = shape_params;
+				ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
+				ctx.beginPath();
+				ctx.rect(x, y, shape_params.length, shape_params.length);
+				ctx.stroke();
+				ctx.closePath();
+				[lastX, lastY] = [x, y];
+			};
+			let mouseMove = (e) => {
+				if (!proximity) return;
+				ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
+				ctx.beginPath();
+				ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
+				ctx.stroke();
+				ctx.closePath();
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+			};
+			canvas.addEventListener('mousedown', mouseDown);
+
+			canvas.addEventListener('mousemove', mouseMove);
+
+			canvas.addEventListener('mouseup',(e)=>{
+				canvas.removeEventListener('mousemove', mouseMove);
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+				proximity.x = lastX;
+				proximity.y = lastY;
+				HISTORY_STACK.push(proximity);
+			});
+		})
+		return square_container;
+	}
+
+	arrowsVTool(){
+		let square_container = document.createElement('div');
+		const arrows_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-arrows-v';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		arrows_button.appendChild(icon);
+		square_container.appendChild(arrows_button);
+		this.toolBox.appendChild(square_container);
+		arrows_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'move';
+
+			let proximity_arr = new PriorityQueue();//min heap priority que
+			let proximity = null;
+			let lastX = 0;
+			let lastY = 0;
+			let isDrawing = false;
+			let ctx = canvas.getContext('2d');
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			let mouseDown = (e) => {
+				//when this is clicked it will get the info of 
+				//the drawing nearest to it 
+				//TODO:- complete priority que 
+				let x = e.offsetX;
+				let y = e.offsetY;
+				isDrawing = true;
+				for (let drawing of HISTORY_STACK){
+					let near = distance(x,y, drawing.x, drawing.y) 
+					drawing['near'] = near
+					proximity_arr.push(drawing);
+				}
+				let shape_params = proximity_arr.pop();
+				proximity = shape_params;
+				ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
+				ctx.beginPath();
+				ctx.rect(x, y, shape_params.length, shape_params.length);
+				ctx.stroke();
+				ctx.closePath();
+				[lastX, lastY] = [x, y];
+			};
+			let mouseMove = (e) => {
+				if (!proximity) return;
+				ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
+				ctx.beginPath();
+				ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
+				ctx.stroke();
+				ctx.closePath();
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+			};
+			canvas.addEventListener('mousedown', mouseDown);
+
+			canvas.addEventListener('mousemove', mouseMove);
+
+			canvas.addEventListener('mouseup',(e)=>{
+				canvas.removeEventListener('mousemove', mouseMove);
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+				proximity.x = lastX;
+				proximity.y = lastY;
+				HISTORY_STACK.push(proximity);
+			});
+		})
+		return square_container;
+	}
+
+	eraserTool(){
+		let square_container = document.createElement('div');
+		const eraser_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-eraser';
+		icon.style.fontSize = '25px';
+		let area = 20;
+		let isErasing = false;
+		icon.style.cursor = 'pointer';
+		eraser_button.appendChild(icon);
+		square_container.appendChild(eraser_button);
+		this.toolBox.appendChild(square_container);
+		eraser_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'move';
+			let ctx = canvas.getContext('2d');
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+
+			let mouseDown = (e) => {
+				if (isErasing) return
+				isErasing = true;
+			};
+			let mouseMove = (e) => {
+				if (!isErasing) return
+				let x = e.offsetX;
+				let y = e.offsetY;
+				console.log(x,y)
+				ctx.clearRect(x,y, area, area)
+			};
+			canvas.addEventListener('mousedown', mouseDown);
+			canvas.addEventListener('mousemove', mouseMove);
+		})
+		return square_container;
+	}
+
 	moveTool(){
 		let square_container = document.createElement('div');
 		const move_button = document.createElement('button');
@@ -576,6 +755,9 @@ tool_box.triangleTool();
 tool_box.circleTool();
 tool_box.colorBox();
 tool_box.moveTool();
+tool_box.eraserTool();
+tool_box.arrowsTool();
+tool_box.arrowsVTool();
 tool_box.strokeBox();
 page.appendChild(tool_box.outerBox());
 
