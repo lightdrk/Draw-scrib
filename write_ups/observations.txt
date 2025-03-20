@@ -21,6 +21,8 @@ answer:-  started drawing after mouse event mouse up is triggered removed the is
 about:- how to draw a square using cordinates on a plane . 
 observation:- i am using euclides formula with pythagores to get horizontal line to draw it.
 issue:- i am getting a square but it is always away from the end of the mouse point.
+update:- i stopped using euclides for square started using rectangle (x1,y1) - for cord,
+		 for length = x2 - x1, breadth = y2 - y1, removing it did not change 
 
 
 

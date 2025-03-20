@@ -292,11 +292,10 @@ class ToolBarNew{
 		const mouseUp = (e) =>{
 			ctx.beginPath();
 			ctx.strokeStyle = 'rgba(255,255,255,1)';
-			let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
-			ctx.rect(lastX, lastY, length, length)
+			ctx.rect(lastX, lastY, e.offsetX - lastX, e.offsetY - lastY)
 			ctx.stroke();
 			ctx.closePath();
-			HISTORY_STACK.push({length, x: lastX, y: lastY});
+			HISTORY_STACK.push({x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY});
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
 
@@ -653,6 +652,65 @@ class ToolBarNew{
 		return square_container;
 	}
 
+	selectionTool(){
+		let square_container = document.createElement('div');
+		const selection_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-mouse-pointer';
+		icon.style.fontSize = '25px';
+		let isSelecting = false;
+		icon.style.cursor = 'pointer';
+		selection_button.appendChild(icon);
+		square_container.appendChild(selection_button);
+		this.toolBox.appendChild(square_container);
+		selection_button.addEventListener('click',(e)=>{
+			let canvas = document.getElementById('canvasid');
+			canvas.style.cursor = 'auto';
+			let ctx = canvas.getContext('2d');
+			let initialX = e.offsetX;
+			let initialY = e.offsetY;
+			let lastX = e.offsetX;
+			let lastY = e.offsetY;
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			//TODO: after reclicking it startes drawing from the clicked area
+
+			let mouseDown = (e) => {
+				if (isSelecting) return
+				isSelecting = true;
+				console.log(initialX);
+				console.log(initialY);
+				initialX = e.offsetX;
+				initialY = e.offsetY;
+				lastX = e.offsetX;
+				lastY = e.offsetY;
+			};
+			let mouseMove = (e) => {
+				if (!isSelecting) return
+				ctx.clearRect(initialX - 1, initialY - 1, initialX - lastX + 1, initialY - lastY + 1);
+				ctx.beginPath();
+				ctx.fillStyle = 'rgba(1,1,1,0.4)';
+				ctx.strokeStyle = 'blue';
+				ctx.lineWidth = 2;
+				ctx.fillRect(initialX, initialY, e.offsetX - initialX, e.offsetY - initialY);
+				ctx.rect(initialX, initialY, e.offsetX - initialX, e.offsetY - initialY);
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+				ctx.stroke();
+				ctx.closePath();
+			};
+
+			let mouseUp = (e) => {
+				canvas.removeEventListener('mousedown', mouseDown);
+				canvas.removeEventListener('mousemove', mouseMove);
+				canvas.removeEventListener('mouseup', mouseUp);
+			};
+			canvas.addEventListener('mousedown', mouseDown);
+			canvas.addEventListener('mousemove', mouseMove);
+			canvas.addEventListener('mouseup', mouseUp);
+		})
+		return square_container;
+	}
+
 	moveTool(){
 		let square_container = document.createElement('div');
 		const move_button = document.createElement('button');
@@ -731,7 +789,7 @@ document.addEventListener('keydown', (event)=>{
 		console.log(HISTORY_STACK);
 		let object = HISTORY_STACK.pop();
 		REDO_STACK.push(object)
-		ctx.clearRect(object.x - 1, object.y - 1, object.length + 1, object.length + 1);
+		ctx.clearRect(object.x1 - 1, object.y1 - 1, object.x2 - object.x1 + 1, object.y2 - object.y1 + 1);
 
 	}
 
@@ -758,6 +816,7 @@ tool_box.moveTool();
 tool_box.eraserTool();
 tool_box.arrowsTool();
 tool_box.arrowsVTool();
+tool_box.selectionTool();
 tool_box.strokeBox();
 page.appendChild(tool_box.outerBox());
 
