@@ -389,7 +389,7 @@ class ToolBarNew{
 		const square_button = document.createElement('button');
 		var icon = document.createElement('i');
 		icon.className = 'fa fa-caret-up';
-		icon.style.fontSize = '25px';
+		icon.style.fontSize = '30px';
 		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		triangle_container.appendChild(square_button);
@@ -414,8 +414,9 @@ class ToolBarNew{
 		const mouseUp = (e) =>{
 			ctx.beginPath();
 			ctx.strokeStyle = 'rgba(255,255,255,1)';
-			let length = Math.floor(Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2));
-			ctx.rect(lastX, lastY, length, length)
+			ctx.lineTo(lastX, lastY);
+			ctx.lineTo(e.offsetX, e.offsetY);
+			ctx.lineTo(e.offsetX+100, e.offsetY);
 			ctx.stroke();
 			ctx.closePath();
 			HISTORY_STACK.push({length, x: lastX, y: lastY});
@@ -692,14 +693,14 @@ class ToolBarNew{
 				ctx.fillStyle = 'rgba(1,1,1,0.4)';
 				ctx.strokeStyle = 'blue';
 				ctx.lineWidth = 2;
-				ctx.fillRect(initialX, initialY, e.offsetX - initialX, e.offsetY - initialY);
+				ctx.fillRect(initialX-1, initialY-1, e.offsetX - initialX - 1, e.offsetY - initialY - 1);
 				ctx.rect(initialX, initialY, e.offsetX - initialX, e.offsetY - initialY);
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 				ctx.stroke();
 				ctx.closePath();
 			};
 
-			let mouseUp = (e) => {
+			let mouseUp = () => {
 				canvas.removeEventListener('mousedown', mouseDown);
 				canvas.removeEventListener('mousemove', mouseMove);
 				canvas.removeEventListener('mouseup', mouseUp);
@@ -707,6 +708,53 @@ class ToolBarNew{
 			canvas.addEventListener('mousedown', mouseDown);
 			canvas.addEventListener('mousemove', mouseMove);
 			canvas.addEventListener('mouseup', mouseUp);
+		})
+		return square_container;
+	}
+
+	textTool(){
+		let square_container = document.createElement('div');
+		const text_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.innerText = 'T';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		text_button.appendChild(icon);
+		square_container.appendChild(text_button);
+		this.toolBox.appendChild(square_container);
+		text_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			let ctx = canvas.getContext('2d');
+			canvas.style.cursor = 'text';
+			let word = ''
+			let lastX = 0;
+			let lastY = 0;
+			let initialX = 0;
+			let initialY = 0;
+			ctx.font = '50px';
+			ctx.lineJoin = 'round';
+			ctx.lineCap = 'round';
+			let mouseDown = (e) => {
+				ctx.beginPath();
+				ctx.strokeStyle = 'rgba(255,255,255,1)';
+				initialX = e.offsetX;
+				initialY = e.offsetY;
+				ctx.rect(e.offsetX, e.offsetY, 200, 10 );
+				ctx.stroke()
+				ctx.closePath()
+
+			};
+			canvas.addEventListener('mousedown', mouseDown);
+			document.addEventListener('keydown', (event)=>{
+				if (event.key){
+					ctx.strokeStyle = 'purple';
+					//let text_width = ctx.measureText(word).width;
+					//ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
+					word+=event.key
+					ctx.fillText(word, lastX, lastY);
+				}
+			});
 		})
 		return square_container;
 	}
@@ -816,6 +864,7 @@ tool_box.moveTool();
 tool_box.eraserTool();
 tool_box.arrowsTool();
 tool_box.arrowsVTool();
+tool_box.textTool();
 tool_box.selectionTool();
 tool_box.strokeBox();
 page.appendChild(tool_box.outerBox());
