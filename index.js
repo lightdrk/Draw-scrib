@@ -719,6 +719,8 @@ class ToolBarNew{
 		icon.innerText = 'T';
 		icon.style.fontSize = '25px';
 
+		let initialX = 0;
+		let initialY = 0;
 		icon.style.cursor = 'pointer';
 		text_button.appendChild(icon);
 		square_container.appendChild(text_button);
@@ -730,9 +732,6 @@ class ToolBarNew{
 			let word = ''
 			let lastX = 0;
 			let lastY = 0;
-			let initialX = 0;
-			let initialY = 0;
-			ctx.font = '50px';
 			ctx.lineJoin = 'round';
 			ctx.lineCap = 'round';
 			let mouseDown = (e) => {
@@ -747,12 +746,20 @@ class ToolBarNew{
 			};
 			canvas.addEventListener('mousedown', mouseDown);
 			document.addEventListener('keydown', (event)=>{
+				//TODO:
+				//half of the font size should be added to move 
+				//the char 
+				//need to save the char details for every cell
+				//for removing process
 				if (event.key){
-					ctx.strokeStyle = 'purple';
+					ctx.font = "30px sans-serif"
+					ctx.fillStyle = "white";
 					//let text_width = ctx.measureText(word).width;
 					//ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
 					word+=event.key
-					ctx.fillText(word, lastX, lastY);
+					console.log(ctx.font)
+					ctx.fillText(event.key, initialX, initialY);
+					initialX+=15;
 				}
 			});
 		})
