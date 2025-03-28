@@ -62,3 +62,10 @@ observation:- might be because i am not properly handling closing of one option.
 8). Removing anything is possible now eraser is working
 about:- remove in certain area
 observation:- creating an area of 20 by default then adding moving and down event to mouse to achive moving erase.
+
+
+9). Working on Inserting text to canvas.
+about:- add text to canvas where ever i click the mouse , should remove using backspace and caps the char on capslock
+issues:- a). text is adding but not properly process is when i type any char single char it should first clear the area
+			then add the word and when typed continously it should continously add. TODO:removal is not working in this part.
+		 b). removal not working using backspace.

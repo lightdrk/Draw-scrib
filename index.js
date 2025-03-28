@@ -751,15 +751,26 @@ class ToolBarNew{
 				//the char 
 				//need to save the char details for every cell
 				//for removing process
-				if (event.key){
-					ctx.font = "30px sans-serif"
+				if (event.key.length == 1){
+					ctx.font = "10px sans-serif"
 					ctx.fillStyle = "white";
-					//let text_width = ctx.measureText(word).width;
-					//ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
+					let text_width = ctx.measureText(word).width;
+					ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
 					word+=event.key
-					console.log(ctx.font)
-					ctx.fillText(event.key, initialX, initialY);
-					initialX+=15;
+					ctx.fillText(word, initialX, initialY+9);
+				}
+
+				if (event.key === 'Backspace'){
+					let n = ''
+					let len = word.length-1
+					for (let i= 0; i< len; i++){
+						n+=word[i]
+					}
+					let text_width = ctx.measureText(word).width;
+					console.log(ctx.getImageData(initialX,initialY, 50, 50))
+					ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
+					ctx.fillText(n, initialX, initialY+9);
+					word = n;
 				}
 			});
 		})
