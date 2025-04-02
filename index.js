@@ -189,6 +189,7 @@ class ToolBarNew{
 		input_slider.max = '1.0';
 		input_slider.step = '0.1';
 		input_slider.value = '0.5';
+
 		input_slider.style.zIndex = '2';
 		slider_container.style.backgroundColor = '#fff';
 		slider_container.style.position = 'absolute';
@@ -752,7 +753,7 @@ class ToolBarNew{
 				//need to save the char details for every cell
 				//for removing process
 				if (event.key.length == 1){
-					ctx.font = "10px sans-serif"
+					ctx.font = "20px sans-serif"
 					ctx.fillStyle = "white";
 					let text_width = ctx.measureText(word).width;
 					ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
@@ -768,7 +769,8 @@ class ToolBarNew{
 					}
 					let text_width = ctx.measureText(word).width;
 					console.log(ctx.getImageData(initialX,initialY, 50, 50))
-					ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
+					console.log(initialX+1, initialY - 25, text_width, 22)
+					ctx.clearRect(initialX+1, initialY - 22, text_width, 22);
 					ctx.fillText(n, initialX, initialY+9);
 					word = n;
 				}
@@ -848,9 +850,10 @@ class ToolBarNew{
 }
 
 document.addEventListener('keydown', (event)=>{
+	console.log(event.key)
+	let canvas = document.getElementById('canvasid');
+	let debug_state = document.getElementById('position-debug') ? true : false; 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'z'){
-		let canvas = document.getElementById('canvasid');
-		canvas.style.cursor = 'crosshair';
 		let ctx = canvas.getContext('2d');
 		console.log(HISTORY_STACK);
 		let object = HISTORY_STACK.pop();
@@ -860,14 +863,44 @@ document.addEventListener('keydown', (event)=>{
 	}
 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'u'){
-		let canvas = document.getElementById('canvasid');
-		canvas.style.cursor = 'crosshair';
 		let ctx = canvas.getContext('2d');
 		[lengths, cord] = REDO_STACK.pop();
 		HISTORY_STACK.push([lengths, cord])
 		ctx.clearRect(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
 
 	}
+	console.log(event.ctrlKey, event.altKey, event.metaKey, !debug_state);
+
+	if (event.ctrlKey && event.altKey && event.metaKey && !debug_state){
+		console.log('event triggered')
+		alert('debug position started');
+		canvas.style.cursor = "crosshair";
+		let debug_position = document.createElement('div');
+		debug_position.id = "position-debug";
+		debug_position.innerText = `x: ${event.clientX}, y: ${event.clientY}`
+		debug_position.style.position = "absolute";
+		debug_position.style.background = "rgba(255,255,255,1)"
+		debug_position.style.padding = "5px";
+		debug_position.style.pointerEvents = "none";
+		debug_position.style.transition = "transform 0.1s ease-out"
+		debug_position.style.zIndex = "10";
+		canvas.appendChild(debug_position);
+
+	}
+});
+
+// mouse event
+
+let debug_position = document.getElementById('position-debug');
+document.addEventListener('mousemove', (event)=>{
+	debug_position = document.getElementById('position-debug');
+	if (debug_position){
+		debug_position.style.left = `${event.clientX+10}px`;
+		debug_position.style.top = `${event.clientY+10}px`;
+		debug_position.innerText = `x: ${event.clientX}, y: ${event.clientY}`;
+	}
+
+
 });
 
 
