@@ -132,7 +132,8 @@ class ToolBarNew{
 		this.moverBox = document.createElement('div');
 		this.toolBox = document.createElement('div');
 		this.corner = document.createElement('div');
-		this.ctx = document.getElementById('canvasid').getContext('2d');
+		this.canvas = document.getElementById('canvasid');
+		this.ctx = this.canvas.getContext('2d');
 		this.globalColor = 'rgba(255,255,255,1)';
 	}
 
@@ -353,7 +354,7 @@ class ToolBarNew{
 		square_button.appendChild(icon);
 		circle_container.appendChild(square_button);
 		this.toolBox.appendChild(circle_container);
-		circle_container.addEventListener('click',()=>{
+		circle_container.addEventListener('click', ()=>{
 			let canvas = document.getElementById('canvasid');
 			canvas.style.cursor = 'crosshair';
 			let lastX = 0;
@@ -398,6 +399,38 @@ class ToolBarNew{
 		square_button.appendChild(icon);
 		hexagon_container.appendChild(square_button);
 		this.toolBox.appendChild(hexagon_container);
+		square_button.addEventListener('click', ()=>{
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
+			let isDrawing = false;
+			let lastX = 0;
+			let lastY = 0;
+			this.canvas.addEventListener('mousedown', (e)=>{
+				isDrawing = true;
+				this.ctx.beginPath();
+				[lastX, lastY] = [e.offsetX, e.offsetY];
+			});
+
+			this.canvas.addEventListener('mouseup', (e)=>{
+				this.ctx.strokeStyle = this.globalColor;
+				let top = (e.offsetX-lastX)/4;
+				let mid = (lastY - e.offsetY)/2;
+
+				this.ctx.moveTo(lastX+top, e.offsetX-top);
+				this.ctx.lineTo(e.offsetX-top, mid);
+				this.ctx.lineTo(mid, e.offsetY);
+				this.ctx.lineTo(mid,e.offsetX-top);
+				this.ctx.lineTo(e.offsetX-top,lastX+top);
+				this.ctx.lineTo(e.offsetY, mid);
+				this.ctx.lineTo(mid,lastX+top);
+				this.ctx.stroke();
+				this.ctx.closePath();
+
+			});
+
+
+
+		});
 		return hexagon_container;
 	}
 
