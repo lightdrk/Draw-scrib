@@ -132,6 +132,8 @@ class ToolBarNew{
 		this.moverBox = document.createElement('div');
 		this.toolBox = document.createElement('div');
 		this.corner = document.createElement('div');
+		this.ctx = document.getElementById('canvasid').getContext('2d');
+		this.globalColor = 'rgba(255,255,255,1)';
 	}
 
 	outerBox(){
@@ -213,7 +215,7 @@ class ToolBarNew{
 
 		let mouseMove = (e)=>{
 			if (!isDrawing) return;
-			ctx.strokeStyle = 'rgba(255,255,255,1)';
+			ctx.strokeStyle = this.globalColor;
 			ctx.moveTo(lastX, lastY);
 			ctx.lineTo(e.offsetX, e.offsetY);
 			ctx.stroke();
@@ -299,7 +301,7 @@ class ToolBarNew{
 
 		const mouseUp = (e) =>{
 
-			ctx.strokeStyle = 'rgba(255,255,255,1)';
+			ctx.strokeStyle = this.globalColor;
 			let width = e.offsetX - lastX;
 			let height = lastY - e.offsetY;
 			let radius = Math.min((e.offsetX - lastX), (e.offsetY - lastY))/2;
@@ -374,7 +376,7 @@ class ToolBarNew{
 			});
 
 			canvas.addEventListener('mouseup',(e)=>{
-				ctx.strokeStyle = 'rgba(255,255,255,1)';
+				ctx.strokeStyle = this.globalColor;
 				let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
 				ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
 				ctx.stroke();
@@ -428,7 +430,7 @@ class ToolBarNew{
 
 		const mouseUp = (e) =>{
 			ctx.beginPath();
-			ctx.strokeStyle = 'rgba(255,255,255,1)';
+			ctx.strokeStyle = this.globalColor;
 			let mid = lastX + (e.offsetX-lastX)/2;
 			ctx.moveTo(mid, lastY);
 			ctx.lineTo(e.offsetX, e.offsetY);
@@ -467,9 +469,13 @@ class ToolBarNew{
 	colorBox(){
 		let colorBoxDiv = document.createElement('div');
 		const colorInput = document.createElement('input');
+		colorInput.id = "color-picker"
 		colorInput.setAttribute('type', 'color');
 		colorBoxDiv.appendChild(colorInput);
 		this.toolBox.appendChild(colorBoxDiv);
+		colorInput.addEventListener('input', (e)=>{
+			this.globalColor = e.target.value;
+		});
 		return colorBoxDiv;
 	}
 
@@ -753,7 +759,7 @@ class ToolBarNew{
 			ctx.lineCap = 'round';
 			let mouseDown = (e) => {
 				ctx.beginPath();
-				ctx.strokeStyle = 'rgba(255,255,255,1)';
+				ctx.strokeStyle = this.gloablColor;
 				initialX = e.offsetX;
 				initialY = e.offsetY;
 				ctx.rect(e.offsetX, e.offsetY, 200, 10 );
