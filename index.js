@@ -303,15 +303,8 @@ class ToolBarNew{
 		const mouseUp = (e) =>{
 
 			ctx.strokeStyle = this.globalColor;
-			let width = e.offsetX - lastX;
-			let height = lastY - e.offsetY;
-			let radius = Math.min((e.offsetX - lastX), (e.offsetY - lastY))/2;
-			let circleX = lastX + width/2;
-			console.log(circleX);
-			let circleY = lastY + height/2;
-			console.log(circleY);
 			ctx.beginPath();
-			ctx.rect(circleX, circleY, radius, 0, 2*Math.PI);
+			ctx.rect(lastX, lastY, e.offsetX - lastX, e.offsetY - lastY)
 			ctx.stroke();
 			ctx.closePath();
 			HISTORY_STACK.push({x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY});
@@ -413,16 +406,19 @@ class ToolBarNew{
 
 			this.canvas.addEventListener('mouseup', (e)=>{
 				this.ctx.strokeStyle = this.globalColor;
-				let top = (e.offsetX-lastX)/4;
+				let top = (e.offsetY-lastY)/4;
 				let mid = (lastY - e.offsetY)/2;
+				let Xmid = (e.offsetX - lastX)/2;
 
-				this.ctx.moveTo(lastX+top, e.offsetX-top);
-				this.ctx.lineTo(e.offsetX-top, mid);
-				this.ctx.lineTo(mid, e.offsetY);
-				this.ctx.lineTo(mid,e.offsetX-top);
-				this.ctx.lineTo(e.offsetX-top,lastX+top);
-				this.ctx.lineTo(e.offsetY, mid);
-				this.ctx.lineTo(mid,lastX+top);
+				this.ctx.moveTo(lastX + Xmid, lastY);
+				this.ctx.lineTo(e.offsetX, lastY-top);
+			//	this.ctx.lineTo(e.offsetX, e.offsetY+top);
+			//	this.ctx.lineTo(lastX+top,e.offsetX-top);
+			//	this.ctx.lineTo(lastX+Xmid,e.offsetY);
+
+			//	this.ctx.lineTo(lastX, e.offsetY+top);
+			//	this.ctx.lineTo(lastX, lastY-top);
+			//	this.ctx.lineTo(lastX+Xmid, lastY);
 				this.ctx.stroke();
 				this.ctx.closePath();
 
