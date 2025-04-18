@@ -75,7 +75,46 @@ function distance(x1,y1, x2,y2){
 
 }
 
+const shape_creator = {
+	"rectangle": (x1, y1, x2, y2, ctx)=>{
+		ctx.beginPath();
+		ctx.rect(x1, y1, x2 - x1, y2 - y1);
+		ctx.stroke();
+		ctx.closePath();
+	},
+
+	"circle": (lastX, lastY, x, y, ctx) =>{
+		ctx.beginPath();
+		let length = Math.sqrt(((x - lastX)**2 + (y - lastY)**2) / 2)
+		ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
+		ctx.stroke();
+		ctx.closePath();
+	},
+
+	"triangle": (lastX, lastY, x, y, ctx) =>{
+		ctx.beginPath();
+		let mid = lastX + (x-lastX)/2;
+		ctx.moveTo(mid, lastY);
+		ctx.lineTo(x, y);
+		ctx.lineTo(lastX, y);
+		ctx.lineTo(mid,lastY);
+		ctx.stroke();
+		ctx.closePath();
+	},
+	"pen": (trace, ctx) => {
+		ctx.beginPath();
+		ctx.moveTo(trace[0][0], trace[0][1]);
+		for (let [x,y] of trace){
+			ctx.lineTo(x, y);
+			ctx.stroke();
+		}
+		ctx.closePath();
+	}
+}
+
+
 const page = document.body;
+
 const HISTORY_STACK = [];
 const REDO_STACK = [];
 
@@ -204,27 +243,35 @@ class ToolBarNew{
 		const pen_container = document.createElement('div');
 		pen_container.id = 'pen'
 		let update=false;
-		let lastX = 0;
-		let lastY = 0;
+		//let lastX = 0;
+		//let lastY = 0;
 		let isDrawing = false;
+		let trace = null;
 		let mouseDown = (e)=>{
 			isDrawing = true;
 			ctx.beginPath();
-			console.log(e.offsetX, e.offsetY);
-			[lastX, lastY] = [e.offsetX, e.offsetY];
+			if (!trace){
+				console.log('1')
+				trace = [];
+			}
+			trace.push([e.offsetX, e.offsetY]);
+			//[lastX, lastY] = [e.offsetX, e.offsetY];
 		}
 
 		let mouseMove = (e)=>{
 			if (!isDrawing) return;
 			ctx.strokeStyle = this.globalColor;
-			ctx.moveTo(lastX, lastY);
+			//ctx.moveTo(lastX, lastY);
 			ctx.lineTo(e.offsetX, e.offsetY);
+			trace.push([e.offsetX, e.offsetY]);
 			ctx.stroke();
-			[lastX, lastY] = [e.offsetX, e.offsetY]
+			//[lastX, lastY] = [e.offsetX, e.offsetY]
 		}
 
 		let mouseUp = (e)=>{
 			ctx.closePath();
+			HISTORY_STACK.push({ "shape": "pen", trace, "lineWidth": ctx.lineWidth})
+			trace = null;
 			isDrawing = false;
 		}
 
@@ -303,11 +350,8 @@ class ToolBarNew{
 		const mouseUp = (e) =>{
 
 			ctx.strokeStyle = this.globalColor;
-			ctx.beginPath();
-			ctx.rect(lastX, lastY, e.offsetX - lastX, e.offsetY - lastY)
-			ctx.stroke();
-			ctx.closePath();
-			HISTORY_STACK.push({x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY});
+			shape_creator["rectangle"](lastX, lastY, e.offsetX , e.offsetY, ctx);
+			HISTORY_STACK.push({ "shape": "rectangle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
 
@@ -358,9 +402,6 @@ class ToolBarNew{
 			ctx.lineCap = 'round';
 			canvas.addEventListener('mousedown', (e)=>{
 				isDrawing = true;
-				ctx.beginPath();
-				console.log(e.offsetX, lastX);
-				console.log(e.offsetY, lastY);
 
 				[lastX, lastY] = [e.offsetX, e.offsetY]
 			});
@@ -371,9 +412,8 @@ class ToolBarNew{
 
 			canvas.addEventListener('mouseup',(e)=>{
 				ctx.strokeStyle = this.globalColor;
-				let length = Math.sqrt(((e.offsetX - lastX)**2 + (e.offsetY - lastY)**2) / 2)
-				ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
-				ctx.stroke();
+				shape_creator["circle"](lastX, lastY, e.offsetX, e.offsetY, ctx);
+				HISTORY_STACK.push({ "shape": "circle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": lineWidth});
 				[lastX, lastY] = [e.offsetX, e.offsetY]
 
 			});
@@ -412,8 +452,8 @@ class ToolBarNew{
 
 				this.ctx.moveTo(lastX + Xmid, lastY);
 				this.ctx.lineTo(e.offsetX, lastY-top);
-			//	this.ctx.lineTo(e.offsetX, e.offsetY+top);
-			//	this.ctx.lineTo(lastX+top,e.offsetX-top);
+				this.ctx.lineTo(e.offsetX, e.offsetY+top);
+				this.ctx.lineTo(lastX+top,e.offsetX-top);
 			//	this.ctx.lineTo(lastX+Xmid,e.offsetY);
 
 			//	this.ctx.lineTo(lastX, e.offsetY+top);
@@ -423,9 +463,6 @@ class ToolBarNew{
 				this.ctx.closePath();
 
 			});
-
-
-
 		});
 		return hexagon_container;
 	}
@@ -458,16 +495,9 @@ class ToolBarNew{
 		};
 
 		const mouseUp = (e) =>{
-			ctx.beginPath();
 			ctx.strokeStyle = this.globalColor;
-			let mid = lastX + (e.offsetX-lastX)/2;
-			ctx.moveTo(mid, lastY);
-			ctx.lineTo(e.offsetX, e.offsetY);
-			ctx.lineTo(lastX, e.offsetY);
-			ctx.lineTo(mid,lastY);
-			ctx.stroke();
-			ctx.closePath();
-			HISTORY_STACK.push({length, x: lastX, y: lastY});
+			shape_creator["triangle"](lastX,lastY, e.offsetX, e.offsetY, ctx);
+			HISTORY_STACK.push({ "shape": "triangle", "lineWidth": ctx.lineWidth, x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": lineWidth});
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
 
@@ -788,7 +818,7 @@ class ToolBarNew{
 			ctx.lineCap = 'round';
 			let mouseDown = (e) => {
 				ctx.beginPath();
-				ctx.strokeStyle = this.gloablColor;
+				ctx.strokeStyle = this.globalColor;
 				initialX = e.offsetX;
 				initialY = e.offsetY;
 				ctx.rect(e.offsetX, e.offsetY, 200, 10 );
@@ -906,18 +936,34 @@ document.addEventListener('keydown', (event)=>{
 	let debug_state = document.getElementById('position-debug') ? true : false; 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'z'){
 		let ctx = canvas.getContext('2d');
-		console.log(HISTORY_STACK);
 		let object = HISTORY_STACK.pop();
 		REDO_STACK.push(object)
-		ctx.clearRect(object.x1 - 1, object.y1 - 1, object.x2 - object.x1 + 1, object.y2 - object.y1 + 1);
-
+		console.log(HISTORY_STACK);
+		ctx.clearRect(0,0, canvas.width, canvas.height);
+		for (let shape_data of HISTORY_STACK){
+			ctx.lineWidth = shape_data.lineWidth;
+			if (shape_data.shape === "pen"){
+				shape_creator[shape_data.shape](shape_data.trace, ctx);
+			}else{
+				shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
+			}
+		}
 	}
 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'u'){
 		let ctx = canvas.getContext('2d');
-		[lengths, cord] = REDO_STACK.pop();
-		HISTORY_STACK.push([lengths, cord])
-		ctx.clearRect(cord[0]-1,cord[1]-1, lengths[0]+1, lengths[1]+1);
+		if (REDO_STACK.length){
+			HISTORY_STACK.push(REDO_STACK.pop());
+		}
+		ctx.clearRect(0,0, canvas.width, canvas.height);
+		for (let shape_data of HISTORY_STACK){
+			ctx.lineWidth = shape_data.lineWidth;
+			if (shape_data.shape === "pen"){
+				shape_creator[shape_data.shape](shape_data.trace, ctx);
+			}else{
+				shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
+			}
+		}
 
 	}
 	console.log(event.ctrlKey, event.altKey, event.metaKey, !debug_state);

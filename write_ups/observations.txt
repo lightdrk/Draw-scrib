@@ -84,3 +84,13 @@ issues:- a). text is adding but not properly process is when i type any char sin
 11). Drawing Triangle?  
 about:- how to draw a circle using cordinates on a plane . 
 observation:- i am using getting the mid from the top of rect or square to get distance between two points and using it as to draw two lines to bottom two points.
+
+
+12). changed undo now i am redrawing everything from the history stack removes the problem of overlap undos, before i was using just clearrect which caused many issues.
+
+13). also added undo for pencil tool, by creating a trace array that stores cordinates for the drawing.. when ever i unclick the mouse it saves it to HISTORY_STACK,
+
+14) re do is also done now can redo and undo too .
+	bug: got a sudden bug when i pressed redo too many times it would add undefined in the stack causing issue simple solution was to add check in redo if empty or not.
+	bug: i am only saving cordinates , causing issue with pen size or any property change of the draw.
+	bugSolved by adding new property too .
