@@ -625,7 +625,7 @@ class ToolBarNew{
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 				proximity.x = lastX;
 				proximity.y = lastY;
-				HISTORY_STACK.push(proximity);
+				HISTORY_STACK.push({ "shape": "rectangle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
 			});
 		})
 		return square_container;
@@ -693,7 +693,7 @@ class ToolBarNew{
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 				proximity.x = lastX;
 				proximity.y = lastY;
-				HISTORY_STACK.push(proximity);
+				HISTORY_STACK.push();
 			});
 		})
 		return square_container;
@@ -890,28 +890,40 @@ class ToolBarNew{
 				let x = e.offsetX;
 				let y = e.offsetY;
 				isDrawing = true;
-				for (let drawing of HISTORY_STACK){
-					let near = distance(x,y, drawing.x, drawing.y) 
-					drawing['near'] = near
-					proximity_arr.push(drawing);
+				for (let idx in HISTORY_STACK){
+					let drawing = HISTORY_STACK[idx];
+					let near = distance(x,y, drawing.x1, drawing.y1); 
+					proximity_arr.push({ drawing, idx });
 				}
-				let shape_params = proximity_arr.pop();
-				proximity = shape_params;
-				ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
-				ctx.beginPath();
-				ctx.rect(x, y, shape_params.length, shape_params.length);
-				ctx.stroke();
-				ctx.closePath();
+				const { drawing, near, idx } = proximity_arr.pop();
+				//deque create it for use ..
+				let from_behind =  HISTORY_STACK.length - (idx+1);
+				let bkp = [];
+				while (from_behind != HISTORY_STACK.length){
+					bkp.push(HISTORY_STACK.pop())
+				}
+				bkp.pop()
+				while (bkp.length){
+					HISTORY_STACK.push(bkp.pop())
+				}
+				console.log(HISTORY_STACK),
+				proximity = drawing;
 				[lastX, lastY] = [x, y];
 			};
 			let mouseMove = (e) => {
 				if (!proximity) return;
-				ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
-				ctx.beginPath();
-				ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
-				ctx.stroke();
-				ctx.closePath();
-				[lastX, lastY] = [e.offsetX, e.offsetY];
+				ctx.clearRect(0,0, canvas.width, canvas.height);
+				for (let shape_data of HISTORY_STACK){
+					ctx.lineWidth = shape_data.lineWidth;
+					if (shape_data.shape === "pen"){
+						shape_creator[shape_data.shape](shape_data.trace, ctx);
+					}else{
+						shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
+					}
+				}
+				
+				shape_creator[proximity.shape](e.offsetX, e.offsetY, e.offsetX + (proximity.x2 - proximity.x1), e.offsetY + (proximity.y2 - proximity.y1), ctx);
+
 			};
 			canvas.addEventListener('mousedown', mouseDown);
 
@@ -920,9 +932,11 @@ class ToolBarNew{
 			canvas.addEventListener('mouseup',(e)=>{
 				canvas.removeEventListener('mousemove', mouseMove);
 				[lastX, lastY] = [e.offsetX, e.offsetY];
-				proximity.x = lastX;
-				proximity.y = lastY;
-				HISTORY_STACK.push(proximity);
+				proximity.x1 = lastX;
+				proximity.y1 = lastY;
+				console.log(proximity);
+				HISTORY_STACK.push({ "shape": proximity.shape, x2: e.offsetX + (proximity.x2 - proximity.x1) , y2: e.offsetY + (proximity.y2 - proximity.y1), x1: e.offsetX, y1: e.offsetY, "lineWidth": proximity.lineWidth});
+				console.log(HISTORY_STACK);
 			});
 		})
 		return square_container;
