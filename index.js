@@ -887,28 +887,22 @@ class ToolBarNew{
 				//when this is clicked it will get the info of 
 				//the drawing nearest to it 
 				//TODO:- complete priority que 
+				console.log("moving");
 				let x = e.offsetX;
 				let y = e.offsetY;
 				isDrawing = true;
 				for (let idx in HISTORY_STACK){
+					console.log(idx)
 					let drawing = HISTORY_STACK[idx];
 					let near = distance(x,y, drawing.x1, drawing.y1); 
-					proximity_arr.push({ drawing, idx });
+					proximity_arr.push({ drawing, idx, near });
 				}
 				const { drawing, near, idx } = proximity_arr.pop();
 				//deque create it for use ..
-				let from_behind =  HISTORY_STACK.length - (idx+1);
-				let bkp = [];
-				while (from_behind != HISTORY_STACK.length){
-					bkp.push(HISTORY_STACK.pop())
-				}
-				bkp.pop()
-				while (bkp.length){
-					HISTORY_STACK.push(bkp.pop())
-				}
-				console.log(HISTORY_STACK),
+				HISTORY_STACK.slice(idx,1);
+				console.log('history --->',HISTORY_STACK);
 				proximity = drawing;
-				[lastX, lastY] = [x, y];
+				console.log(proximity);
 			};
 			let mouseMove = (e) => {
 				if (!proximity) return;
@@ -923,6 +917,10 @@ class ToolBarNew{
 				}
 				
 				shape_creator[proximity.shape](e.offsetX, e.offsetY, e.offsetX + (proximity.x2 - proximity.x1), e.offsetY + (proximity.y2 - proximity.y1), ctx);
+				proximity.x2 = e.offsetX + (proximity.x2 - proximity.x1);
+				proximity.y2 = e.offsetY + (proximity.y2 - proximity.y1);
+				proximity.x1 = e.offsetX;
+				proximity.y1 = e.offsetY;
 
 			};
 			canvas.addEventListener('mousedown', mouseDown);
@@ -931,11 +929,8 @@ class ToolBarNew{
 
 			canvas.addEventListener('mouseup',(e)=>{
 				canvas.removeEventListener('mousemove', mouseMove);
-				[lastX, lastY] = [e.offsetX, e.offsetY];
-				proximity.x1 = lastX;
-				proximity.y1 = lastY;
-				console.log(proximity);
-				HISTORY_STACK.push({ "shape": proximity.shape, x2: e.offsetX + (proximity.x2 - proximity.x1) , y2: e.offsetY + (proximity.y2 - proximity.y1), x1: e.offsetX, y1: e.offsetY, "lineWidth": proximity.lineWidth});
+				console.log('Proximity -->',proximity);
+				HISTORY_STACK.push(proximity)//{ "shape": proximity.shape, x2: e.offsetX + (proximity.x2 - proximity.x1) , y2: e.offsetY + (proximity.y2 - proximity.y1), x1: e.offsetX, y1: e.offsetY, "lineWidth": proximity.lineWidth });
 				console.log(HISTORY_STACK);
 			});
 		})
@@ -950,8 +945,9 @@ document.addEventListener('keydown', (event)=>{
 	let debug_state = document.getElementById('position-debug') ? true : false; 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'z'){
 		let ctx = canvas.getContext('2d');
-		let object = HISTORY_STACK.pop();
-		REDO_STACK.push(object)
+		if (HISTORY_STACK.length){
+			REDO_STACK.push(HISTORY_STACK.pop());
+		}
 		console.log(HISTORY_STACK);
 		ctx.clearRect(0,0, canvas.width, canvas.height);
 		for (let shape_data of HISTORY_STACK){
@@ -966,6 +962,7 @@ document.addEventListener('keydown', (event)=>{
 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'u'){
 		let ctx = canvas.getContext('2d');
+		console.log(REDO_STACK);
 		if (REDO_STACK.length){
 			HISTORY_STACK.push(REDO_STACK.pop());
 		}
