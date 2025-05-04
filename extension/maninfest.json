@@ -1,0 +1,19 @@
+{
+  "manifest_version": 1,
+  "name": "Draw-scrib",
+  "version": "1.0",
+  "description": "This chrome extension can be used for basic drawing and drawing over website for idea and thinking.",
+  "action": {
+    "default_icon": "icon.png",
+    "default_title": "Draw-Scrib"
+  },
+  "permissions": ["activeTab", "scripting"],
+  "host_permissions": ["<all_urls"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "48": "icon.png"
+  }
+}
+

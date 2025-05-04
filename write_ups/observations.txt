@@ -94,3 +94,14 @@ observation:- i am using getting the mid from the top of rect or square to get d
 	bug: got a sudden bug when i pressed redo too many times it would add undefined in the stack causing issue simple solution was to add check in redo if empty or not.
 	bug: i am only saving cordinates , causing issue with pen size or any property change of the draw.
 	bugSolved by adding new property too .
+15). Text , adding rendering to it , so we dont have to follow cleaning , and prevent distroying drawing near it
+	1). i am using buffer.from() to create a string buffer to optimize the use of string.
+	2). we are rendering everytime we add text watch out for performance issues. 
+	3). in last when i click ( esc ) to complete the write we convert the buffer to an string.
+
+16). issue , when using adding new things it is not working , meaning it is not showing until unless i add the points to the canvas like if i draw rectangle before hand.
+	1). happens with opening file.
+	2). also happening with line to tool.
+
+
+

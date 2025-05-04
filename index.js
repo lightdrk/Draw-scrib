@@ -109,8 +109,21 @@ const shape_creator = {
 			ctx.stroke();
 		}
 		ctx.closePath();
+	},
+	"text": (x, y, word, ctx) => {
+		ctx.fillText(word, x, y);
+	},
+	"line": (x, y, x1, y1, ctx) =>{
+		ctx.beginPath();
+		ctx.moveTo(x,y);
+		ctx.lineTo(x1,y1);
+		ctx.stroke();
+		ctx.closePath();
 	}
 }
+
+
+
 
 
 const page = document.body;
@@ -124,9 +137,11 @@ function canvas_element(){
 	canvas.style.backgroundColor = 'rgba(0,0,0,1)';
 	canvas.style.opacity = '0.5';
 	canvas.style.position = 'absolute';
-	canvas.style.zIndex = '1';
-	canvas.width = window.innerWidth;
-	canvas.height = window.innerHeight;
+	canvas.style.top = '0';
+	canvas.style.left = '0';
+	canvas.style.zIndex = '9999';
+	canvas.width = document.documentElement.scrollWidth;
+	canvas.height = document.documentElement.scrollHeight;
 	return canvas
 }
 
@@ -140,11 +155,33 @@ function slider(){
 	input_slider.max = '1.0';
 	input_slider.step = '0.1';
 	input_slider.value = '0.5';
-	input_slider.style.zIndex = '2';
+	input_slider.style.zIndex = '99999';
 	slider_container.style.backgroundColor = '#fff';
 	slider_container.style.position = 'absolute';
-	slider_container.style.zIndex = '5';
+	slider_container.style.zIndex = '999999';
 	return slider_container;
+}
+
+function render(canvas){
+		let ctx = canvas.getContext('2d');
+		ctx.clearRect(0,0, canvas.width, canvas.height);
+		for (let shape_data of HISTORY_STACK){
+			ctx.lineWidth = shape_data.lineWidth;
+			console.log(shape_data);
+			switch (shape_data.shape){
+				case "pen":
+					shape_creator["pen"](shape_data.trace, ctx);
+					break;
+				case "text":
+					shape_creator["text"](shape_data.x, shape_data.y, shape_data.word, ctx);
+					break
+				case "line":
+					shape_creator["line"](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
+					break
+				default:
+					shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
+			}
+		}
 }
 
 
@@ -184,7 +221,7 @@ class ToolBarNew{
 		this.toolBox.style.backgroundColor = 'rgba(244,244,244,1)';
 		this.toolBox.id = 'tool-box';
 		this.toolBox.style.position = 'absolute';
-		this.toolBox.style.zIndex = '5';
+		this.toolBox.style.zIndex = '999999';
 		this.toolBox.style.display = 'flex';
 		this.toolBox.style.justifyContent = 'space-between';
 		this.toolBox.style.border = '1px solid';
@@ -219,7 +256,6 @@ class ToolBarNew{
 			isDragging = false;
 		});
 	}
-
 
 	canvasOpacityController(){
 		const slider_container = document.createElement('div');
@@ -446,22 +482,18 @@ class ToolBarNew{
 
 			this.canvas.addEventListener('mouseup', (e)=>{
 				this.ctx.strokeStyle = this.globalColor;
-				let top = (e.offsetY-lastY)/4;
-				let mid = (lastY - e.offsetY)/2;
-				let Xmid = (e.offsetX - lastX)/2;
-
-				this.ctx.moveTo(lastX + Xmid, lastY);
-				this.ctx.lineTo(e.offsetX, lastY-top);
-				this.ctx.lineTo(e.offsetX, e.offsetY+top);
-				this.ctx.lineTo(lastX+top,e.offsetX-top);
-			//	this.ctx.lineTo(lastX+Xmid,e.offsetY);
-
-			//	this.ctx.lineTo(lastX, e.offsetY+top);
-			//	this.ctx.lineTo(lastX, lastY-top);
-			//	this.ctx.lineTo(lastX+Xmid, lastY);
-				this.ctx.stroke();
-				this.ctx.closePath();
-
+				ctx.beginPath();
+				for (let i = 0; i < 6; i++) {
+				  const angle = Math.PI / 3 * i;
+				  const x = centerX + size * Math.cos(angle);
+				  const y = centerY + size * Math.sin(angle);
+				  if (i === 0) {
+					ctx.moveTo(x, y);
+				  } else {
+					ctx.lineTo(x, y);
+				  }
+				}
+				ctx.closePath();
 			});
 		});
 		return hexagon_container;
@@ -560,6 +592,42 @@ class ToolBarNew{
 		}
 		this.toolBox.appendChild(strokeBoxDiv);
 		return strokeBoxDiv;
+	}
+
+	lineTool(){
+		let square_container = document.createElement('div');
+		const arrows_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-minus';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		arrows_button.appendChild(icon);
+		square_container.appendChild(arrows_button);
+		this.toolBox.appendChild(square_container);
+		arrows_button.addEventListener('click',()=>{
+			let canvas = document.getElementById('canvasid');
+			let ctx = canvas.getContext('2d');
+			canvas.style.cursor = 'crosshair';
+			let lastX = null;
+			let lastY = null;
+
+			let mouseDown = (e) => {
+				console.log(lastX, lastY, e.offsetX, e.offsetY);
+				if (lastX & lastY){
+					shape_creator["line"](lastX, lastY, e.offsetX, e.offsetY, ctx);
+					HISTORY_STACK.push({ "shape": "line", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth})
+					console.log(HISTORY_STACK);
+					lastX = null;
+					lastY = null;
+					return
+				}
+				lastX = e.offsetX;
+				lastY = e.offsetY;
+			};
+			canvas.addEventListener('mousedown', mouseDown);
+		})
+		return square_container;
 	}
 
 
@@ -811,9 +879,9 @@ class ToolBarNew{
 			let canvas = document.getElementById('canvasid');
 			let ctx = canvas.getContext('2d');
 			canvas.style.cursor = 'text';
-			let word = ''
 			let lastX = 0;
 			let lastY = 0;
+			let word = '' //Array.from("");// buffer fro efficency
 			ctx.lineJoin = 'round';
 			ctx.lineCap = 'round';
 			let mouseDown = (e) => {
@@ -826,8 +894,9 @@ class ToolBarNew{
 				ctx.closePath()
 
 			};
-			canvas.addEventListener('mousedown', mouseDown);
-			document.addEventListener('keydown', (event)=>{
+
+			const keyHandler = (event)=>{
+				console.log(event.key)
 				//TODO:
 				//half of the font size should be added to move 
 				//the char 
@@ -836,26 +905,24 @@ class ToolBarNew{
 				if (event.key.length == 1){
 					ctx.font = "20px sans-serif"
 					ctx.fillStyle = "white";
-					let text_width = ctx.measureText(word).width;
-					ctx.clearRect(initialX+1, initialY - 10+1, text_width, 10);
+					render(canvas);
 					word+=event.key
 					ctx.fillText(word, initialX, initialY+9);
 				}
+				if (event.key === 'Escape'){
+					HISTORY_STACK.push({ "shape": "text", word, 'x': initialX, 'y': initialY+9 });
+					document.removeEventListener( 'keydown', keyHandler);
+				}
 
 				if (event.key === 'Backspace'){
-					let n = ''
-					let len = word.length-1
-					for (let i= 0; i< len; i++){
-						n+=word[i]
-					}
-					let text_width = ctx.measureText(word).width;
-					console.log(ctx.getImageData(initialX,initialY, 50, 50))
-					console.log(initialX+1, initialY - 25, text_width, 22)
-					ctx.clearRect(initialX+1, initialY - 22, text_width, 22);
-					ctx.fillText(n, initialX, initialY+9);
-					word = n;
+					word = word.slice(0,-1)
+					render(canvas)
+					ctx.fillText(word, initialX, initialY+9);
 				}
-			});
+			};
+
+			canvas.addEventListener('mousedown', mouseDown);
+			document.addEventListener('keydown', keyHandler);
 		})
 		return square_container;
 	}
@@ -937,45 +1004,86 @@ class ToolBarNew{
 		return square_container;
 	}
 
+	saveTool(){
+		let square_container = document.createElement('div');
+		const save_button = document.createElement('button');
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-save';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		save_button.appendChild(icon);
+		square_container.appendChild(save_button);
+		this.toolBox.appendChild(square_container);
+		save_button.addEventListener('click',()=>{
+			let state = JSON.stringify(HISTORY_STACK, null, 2);
+			const blob = new Blob([state], { type: "application/json" });
+			const link = document.createElement("a");
+			link.href = URL.createObjectURL(blob);
+			link.download = "Draw-scrib.dscr";
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(link.href);
+
+		})
+		return square_container;
+	}
+
+
+	openFileTool(){
+		let square_container = document.createElement('div');
+		const save_button = document.createElement('input');
+		save_button.type = "file";
+		var icon = document.createElement('i');
+		icon.className = 'fa fa-folder-open-o';
+		icon.style.fontSize = '25px';
+
+		icon.style.cursor = 'pointer';
+		save_button.appendChild(icon);
+		square_container.appendChild(save_button);
+		this.toolBox.appendChild(square_container);
+		save_button.addEventListener('change',()=>{
+
+			let canvas = document.getElementById('canvasid');
+			console.log(canvas)
+			const file = save_button.files[0];
+			if (file){
+				const reader = new FileReader();
+				reader.onload = (e) => {
+					const dta = JSON.parse(e.target.result);
+					for(let obj of dta){
+						HISTORY_STACK.push(obj);
+					}
+					setTimeout(() => {
+						console.log('invocked-->',render(canvas));
+					}, 1);
+				}
+				reader.readAsText(file); //start reading the file
+			}
+
+		})
+		return square_container;
+	}
+
 }
 
 document.addEventListener('keydown', (event)=>{
-	console.log(event.key)
 	let canvas = document.getElementById('canvasid');
 	let debug_state = document.getElementById('position-debug') ? true : false; 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'z'){
-		let ctx = canvas.getContext('2d');
 		if (HISTORY_STACK.length){
 			REDO_STACK.push(HISTORY_STACK.pop());
 		}
-		console.log(HISTORY_STACK);
-		ctx.clearRect(0,0, canvas.width, canvas.height);
-		for (let shape_data of HISTORY_STACK){
-			ctx.lineWidth = shape_data.lineWidth;
-			if (shape_data.shape === "pen"){
-				shape_creator[shape_data.shape](shape_data.trace, ctx);
-			}else{
-				shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
-			}
-		}
+		render(canvas);
 	}
 
 	if ((event.ctrlKey || event.metaKey) && event.key === 'u'){
-		let ctx = canvas.getContext('2d');
 		console.log(REDO_STACK);
 		if (REDO_STACK.length){
 			HISTORY_STACK.push(REDO_STACK.pop());
 		}
-		ctx.clearRect(0,0, canvas.width, canvas.height);
-		for (let shape_data of HISTORY_STACK){
-			ctx.lineWidth = shape_data.lineWidth;
-			if (shape_data.shape === "pen"){
-				shape_creator[shape_data.shape](shape_data.trace, ctx);
-			}else{
-				shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
-			}
-		}
-
+		render(canvas);
 	}
 	console.log(event.ctrlKey, event.altKey, event.metaKey, !debug_state);
 
@@ -1020,7 +1128,10 @@ tool_box.triangleTool();
 tool_box.circleTool();
 tool_box.colorBox();
 tool_box.moveTool();
+tool_box.saveTool();
+tool_box.openFileTool();
 tool_box.eraserTool();
+tool_box.lineTool();
 tool_box.arrowsTool();
 tool_box.arrowsVTool();
 tool_box.textTool();
