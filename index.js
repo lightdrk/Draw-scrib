@@ -224,6 +224,7 @@ class ToolBarNew{
 		this.toolBox.style.zIndex = '999999';
 		this.toolBox.style.display = 'flex';
 		this.toolBox.style.justifyContent = 'space-between';
+		this.toolBox.style.top = '0';
 		this.toolBox.style.border = '1px solid';
 		//this.moverBox.appendChild(this.toolBox);
 		this.toolBox.appendChild(this.moverBox);
@@ -271,7 +272,8 @@ class ToolBarNew{
 		input_slider.style.zIndex = '2';
 		slider_container.style.backgroundColor = '#fff';
 		slider_container.style.position = 'absolute';
-		slider_container.style.zIndex = '5';
+		slider_container.style.zIndex = '999999';
+		slider_container.style.top = '0'
 		return slider_container;
 	}
 
