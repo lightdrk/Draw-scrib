@@ -507,6 +507,7 @@ class ToolBarNew{
 		var icon = document.createElement('i');
 		icon.className = 'fa fa-caret-up';
 		icon.style.fontSize = '30px';
+		icon.style.scale = '1.3';
 		icon.style.cursor = 'pointer';
 		square_button.appendChild(icon);
 		triangle_container.appendChild(square_button);
@@ -976,15 +977,7 @@ class ToolBarNew{
 			let mouseMove = (e) => {
 				if (!proximity) return;
 				ctx.clearRect(0,0, canvas.width, canvas.height);
-				for (let shape_data of HISTORY_STACK){
-					ctx.lineWidth = shape_data.lineWidth;
-					if (shape_data.shape === "pen"){
-						shape_creator[shape_data.shape](shape_data.trace, ctx);
-					}else{
-						shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
-					}
-				}
-				
+				render(canvas);
 				shape_creator[proximity.shape](e.offsetX, e.offsetY, e.offsetX + (proximity.x2 - proximity.x1), e.offsetY + (proximity.y2 - proximity.y1), ctx);
 				proximity.x2 = e.offsetX + (proximity.x2 - proximity.x1);
 				proximity.y2 = e.offsetY + (proximity.y2 - proximity.y1);
@@ -996,11 +989,8 @@ class ToolBarNew{
 
 			canvas.addEventListener('mousemove', mouseMove);
 
-			canvas.addEventListener('mouseup',(e)=>{
-				canvas.removeEventListener('mousemove', mouseMove);
-				console.log('Proximity -->',proximity);
-				HISTORY_STACK.push(proximity)//{ "shape": proximity.shape, x2: e.offsetX + (proximity.x2 - proximity.x1) , y2: e.offsetY + (proximity.y2 - proximity.y1), x1: e.offsetX, y1: e.offsetY, "lineWidth": proximity.lineWidth });
-				console.log(HISTORY_STACK);
+			canvas.addEventListener('mouseup',()=>{
+				proximity = null;
 			});
 		})
 		return square_container;
@@ -1125,7 +1115,7 @@ document.addEventListener('mousemove', (event)=>{
 let tool_box = new ToolBarNew();
 tool_box.penTool();
 tool_box.squareTool();
-tool_box.hexagonTool();
+//tool_box.hexagonTool();
 tool_box.triangleTool();
 tool_box.circleTool();
 tool_box.colorBox();

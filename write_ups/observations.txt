@@ -99,7 +99,12 @@ observation:- i am using getting the mid from the top of rect or square to get d
 	2). we are rendering everytime we add text watch out for performance issues. 
 	3). in last when i click ( esc ) to complete the write we convert the buffer to an string.
 
-16). issue , when using adding new things it is not working , meaning it is not showing until unless i add the points to the canvas like if i draw rectangle before hand.
+16). move issues
+	1). move was adding new extra shapes which should not be their , resolved
+	2). move works only once. then stops working , resolved -> it was because move event was being removed when mouseup is used 
+	3). move does not work with all shape..
+
+17). issue , when using adding new things it is not working , meaning it is not showing until unless i add the points to the canvas like if i draw rectangle before hand.
 	1). happens with opening file.
 	2). also happening with line to tool.
 
