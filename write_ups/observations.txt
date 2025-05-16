@@ -104,9 +104,13 @@ observation:- i am using getting the mid from the top of rect or square to get d
 	2). move works only once. then stops working , resolved -> it was because move event was being removed when mouseup is used 
 	3). move does not work with all shape..
 
+18). buggs not able to resolve i will decrease or create sub file i was not doing it because it was just a simple html and js file i did not know how to import them properly now 
+	i have added it to exstension so i can them.
+
+
 17). issue , when using adding new things it is not working , meaning it is not showing until unless i add the points to the canvas like if i draw rectangle before hand.
 	1). happens with opening file.
 	2). also happening with line to tool.
-
+	3) RESOLVED --> issue was because i was not adding this.globalColor to the ctx causing the issue  (: |)
 
 

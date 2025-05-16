@@ -1,212 +1,9 @@
-//const pq = require('./utils/priorityQue');
-//
-//
-//
-class PriorityQueue{
-	//complete priority ques
-	constructor() {
-		this.root = [];
-	}
-
-	parent(idx){
-		return (idx-1)>>1;
-	}
-
-	left(idx){
-		return (idx<<1)+1;
-	}
-
-	right(idx){
-		return (idx<<1)+2;
-	}
-
-	heapify_up(idx){
-		while (idx>0 && this.root[idx].near < this.root[this.parent(idx)].near){
-			let val = this.root[idx];
-			this.root[idx] = this.root[this.parent(idx)];
-			this.root[this.parent(idx)] = val;
-			idx = this.parent(idx);
-		}
-	}
-
-	heapify_down(idx){
-		let left = this.left(idx);
-		let right = this.right(idx);
-		let smallest = idx
-		let length = this.root.length;
-		if (left < length && this.root[idx].near > this.root[left].near){
-			smallest = left;
-		}
-		if (right < length && this.root[smallest].near > this.root[right].near){
-			smallest = right
-		}
-		if (smallest != idx){
-			let val = this.root[smallest];
-			this.root[smallest] = this.root[idx]
-			this.root[idx] = val
-			this.heapify_down(smallest);
-		}
-	}
-
-	push(val){
-		this.root.push(val);
-		this.heapify_up(this.root.length-1);
-	}
-
-	pop(){
-		let val = this.root.pop();
-		if (this.root.length > 0){
-			let swap = this.root[0]
-			this.root[0] = val
-			val = swap;
-			this.heapify_down(0);
-		}
-		return val;
-	}
-
-	peek(){
-		return this.root[0];
-	}
-}
-
-
 function distance(x1,y1, x2,y2){
 	return (x2-x1)**2 + (y2-y1)**2;
 
 }
 
-const shape_creator = {
-	"rectangle": (x1, y1, x2, y2, ctx)=>{
-		ctx.beginPath();
-		ctx.rect(x1, y1, x2 - x1, y2 - y1);
-		ctx.stroke();
-		ctx.closePath();
-	},
-
-	"circle": (lastX, lastY, x, y, ctx) =>{
-		ctx.beginPath();
-		let length = Math.sqrt(((x - lastX)**2 + (y - lastY)**2) / 2)
-		ctx.arc(lastX, lastY, length, 0, 2*Math.PI );
-		ctx.stroke();
-		ctx.closePath();
-	},
-
-	"triangle": (lastX, lastY, x, y, ctx) =>{
-		ctx.beginPath();
-		let mid = lastX + (x-lastX)/2;
-		ctx.moveTo(mid, lastY);
-		ctx.lineTo(x, y);
-		ctx.lineTo(lastX, y);
-		ctx.lineTo(mid,lastY);
-		ctx.stroke();
-		ctx.closePath();
-	},
-	"pen": (trace, ctx) => {
-		ctx.beginPath();
-		ctx.moveTo(trace[0][0], trace[0][1]);
-		for (let [x,y] of trace){
-			ctx.lineTo(x, y);
-			ctx.stroke();
-		}
-		ctx.closePath();
-	},
-	"text": (x, y, word, ctx) => {
-		ctx.fillText(word, x, y);
-	},
-	"line": (x, y, x1, y1, ctx) =>{
-		ctx.beginPath();
-		ctx.moveTo(x,y);
-		ctx.lineTo(x1,y1);
-		ctx.stroke();
-		ctx.closePath();
-	}
-}
-
-
-
-
-const page = document.body;
-const div = document.createElement('div');
-
-const HISTORY_STACK = [];
-const REDO_STACK = [];
-
-function canvas_element(){
-	const canvas = document.createElement('canvas');
-	canvas.id = 'canvasid';
-	canvas.style.backgroundColor = 'rgba(0,0,0,1)';
-	canvas.style.opacity = '0.5';
-	canvas.style.position = 'absolute';
-	canvas.style.top = '0';
-	canvas.style.left = '0';
-	canvas.style.zIndex = '9999';
-	canvas.width = document.documentElement.scrollWidth;
-	canvas.height = document.documentElement.scrollHeight;
-	return canvas
-}
-
-function slider(){
-	const slider_container = document.createElement('div');
-	const input_slider = document.createElement('input');
-	slider_container.appendChild(input_slider);
-	input_slider.type = 'range';
-	input_slider.id = "slider";
-	input_slider.min = '0.0';
-	input_slider.max = '1.0';
-	input_slider.step = '0.1';
-	input_slider.value = '0.5';
-	input_slider.style.zIndex = '99999';
-	slider_container.style.backgroundColor = '#fff';
-	slider_container.style.position = 'absolute';
-	slider_container.style.zIndex = '999999';
-	return slider_container;
-}
-
-function render(canvas){
-	let ctx = canvas.getContext('2d');
-	ctx.clearRect(0,0, canvas.width, canvas.height);
-	console.log(HISTORY_STACK);
-	for (let shape_data of HISTORY_STACK){
-		ctx.lineWidth = shape_data.lineWidth;
-		console.log('rendering ....');
-		console.log(shape_data);
-		switch (shape_data.shape){
-			case "pen":
-				shape_creator["pen"](shape_data.trace, ctx);
-				break;
-			case "text":
-				shape_creator["text"](shape_data.x, shape_data.y, shape_data.word, ctx);
-				break
-			case "line":
-				shape_creator["line"](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
-				break
-			default:
-				shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
-		}
-	}
-}
-
-
-let canvas = canvas_element();
-let slid = slider()
-
-
-div.appendChild(canvas);
-
-div.appendChild(slid);
-page.appendChild(div)
-let slider_for_event = document.getElementById('slider');
-if (slider_for_event){
-	console.log(slider_for_event);
-	slider_for_event.addEventListener('change', (e) => {
-		console.log(e)
-		let opacity = e.target.value;
-		console.log(opacity);
-		canvas.style.opacity = ''+opacity;
-	})
-}
-
-class ToolBarNew{
+export class ToolBarNew{
 	constructor(){
 		this.moverBox = document.createElement('div');
 		this.toolBox = document.createElement('div');
@@ -616,30 +413,23 @@ class ToolBarNew{
 		let lineToolActive = false;
 	
 		arrows_button.addEventListener('click',()=>{
-			console.log(HISTORY_STACK);
 			let canvas = document.getElementById('canvasid');
 			let ctx = canvas.getContext('2d');
-			ctx.strokeStyle = this.globalColor;
 			canvas.style.cursor = 'crosshair';
 			let lastX = null;
 			let lastY = null;
 
 			let mouseDown = (e) => {
-				console.log(HISTORY_STACK);
 				console.log(ctx);
 				if (lastX & lastY){
-
-					HISTORY_STACK.push({ "shape": "line", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
 					shape_creator["line"](lastX, lastY, e.offsetX, e.offsetY, ctx);
+					HISTORY_STACK.push({ "shape": "line", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
 					lastX = null;
 					lastY = null;
-					console.log('end -->', HISTORY_STACK);
-
 					return
 				}
 				lastX = e.offsetX;
 				lastY = e.offsetY;
-				console.log('end -->',HISTORY_STACK);
 			};
 
 			if (! lineToolActive){
@@ -1051,9 +841,8 @@ class ToolBarNew{
 		square_container.appendChild(save_button);
 		this.toolBox.appendChild(square_container);
 		save_button.addEventListener('change',()=>{
+
 			let canvas = document.getElementById('canvasid');
-			let ctx = canvas.getContext('2d');
-			ctx.strokeStyle = this.globalColor;
 			const file = save_button.files[0];
 			if (file){
 				const reader = new FileReader();
@@ -1072,76 +861,3 @@ class ToolBarNew{
 	}
 
 }
-
-document.addEventListener('keydown', (event)=>{
-	let canvas = document.getElementById('canvasid');
-	let debug_state = document.getElementById('position-debug') ? true : false; 
-	if ((event.ctrlKey || event.metaKey) && event.key === 'z'){
-		if (HISTORY_STACK.length){
-			REDO_STACK.push(HISTORY_STACK.pop());
-		}
-		render(canvas);
-	}
-
-	if ((event.ctrlKey || event.metaKey) && event.key === 'u'){
-		console.log(REDO_STACK);
-		if (REDO_STACK.length){
-			HISTORY_STACK.push(REDO_STACK.pop());
-		}
-		render(canvas);
-	}
-	console.log(event.ctrlKey, event.altKey, event.metaKey, !debug_state);
-
-	if (event.ctrlKey && event.altKey && event.metaKey && !debug_state){
-		console.log('event triggered')
-		alert('debug position started');
-		canvas.style.cursor = "crosshair";
-		let debug_position = document.createElement('div');
-		debug_position.id = "position-debug";
-		debug_position.innerText = `x: ${event.clientX}, y: ${event.clientY}`
-		debug_position.style.position = "absolute";
-		debug_position.style.background = "rgba(255,255,255,1)"
-		debug_position.style.padding = "5px";
-		debug_position.style.pointerEvents = "none";
-		debug_position.style.transition = "transform 0.1s ease-out"
-		debug_position.style.zIndex = "10";
-		canvas.appendChild(debug_position);
-
-	}
-});
-
-// mouse event
-
-let debug_position = document.getElementById('position-debug');
-document.addEventListener('mousemove', (event)=>{
-	debug_position = document.getElementById('position-debug');
-	if (debug_position){
-		debug_position.style.left = `${event.clientX+10}px`;
-		debug_position.style.top = `${event.clientY+10}px`;
-		debug_position.innerText = `x: ${event.clientX}, y: ${event.clientY}`;
-	}
-
-
-});
-
-
-let tool_box = new ToolBarNew();
-tool_box.penTool();
-tool_box.squareTool();
-//tool_box.hexagonTool();
-tool_box.triangleTool();
-tool_box.circleTool();
-tool_box.colorBox();
-tool_box.moveTool();
-tool_box.saveTool();
-tool_box.openFileTool();
-tool_box.eraserTool();
-tool_box.lineTool();
-//tool_box.arrowsTool();
-//tool_box.arrowsVTool();
-tool_box.textTool();
-tool_box.selectionTool();
-tool_box.strokeBox();
-div.appendChild(tool_box.outerBox());
-tool_box.outerBoxMove();
-
