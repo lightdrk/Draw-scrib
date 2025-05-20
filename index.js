@@ -165,7 +165,6 @@ function slider(){
 function render(canvas){
 	let ctx = canvas.getContext('2d');
 	ctx.clearRect(0,0, canvas.width, canvas.height);
-	console.log(HISTORY_STACK);
 	for (let shape_data of HISTORY_STACK){
 		ctx.lineWidth = shape_data.lineWidth;
 		console.log('rendering ....');
@@ -184,6 +183,24 @@ function render(canvas){
 				shape_creator[shape_data.shape](shape_data.x1, shape_data.y1, shape_data.x2, shape_data.y2, ctx);
 		}
 	}
+}
+
+function movement(proximity, x, y){
+	switch( proximity.shape){
+		case "pen":
+			proximity
+
+		case "text":
+
+		case "line":
+
+		default:
+			proximity.x2 = x + (proximity.x2 - proximity.x1);
+			proximity.y2 = y + (proximity.y2 - proximity.y1);
+			proximity.x1 = x;
+			proximity.y1 = y;
+	}
+
 }
 
 
@@ -290,7 +307,7 @@ class ToolBarNew{
 		let trace = null;
 		let mouseDown = (e)=>{
 			isDrawing = true;
-			ctx.beginPath();
+			this.ctx.beginPath();
 			if (!trace){
 				console.log('1')
 				trace = [];
@@ -301,28 +318,24 @@ class ToolBarNew{
 
 		let mouseMove = (e)=>{
 			if (!isDrawing) return;
-			ctx.strokeStyle = this.globalColor;
-			//ctx.moveTo(lastX, lastY);
-			ctx.lineTo(e.offsetX, e.offsetY);
+			this.ctx.strokeStyle = this.globalColor;
+			//this.ctx.moveTo(lastX, lastY);
+			this.ctx.lineTo(e.offsetX, e.offsetY);
 			trace.push([e.offsetX, e.offsetY]);
-			ctx.stroke();
+			this.ctx.stroke();
 			//[lastX, lastY] = [e.offsetX, e.offsetY]
 		}
 
 		let mouseUp = (e)=>{
-			ctx.closePath();
-			HISTORY_STACK.push({ "shape": "pen", trace, "lineWidth": ctx.lineWidth})
+			this.ctx.closePath();
+			HISTORY_STACK.push({ "shape": "pen", trace, "lineWidth": this.ctx.lineWidth})
 			trace = null;
 			isDrawing = false;
 		}
 
-		let x = document.getElementById('canvasid');
-
-		let canvas = document.getElementById('canvasid');
-		x.style.cursor = 'crosshair';
-		let ctx = canvas.getContext('2d');
-		ctx.lineJoin = 'round';
-		ctx.lineCap = 'round';
+		this.canvas.style.cursor = 'crosshair';
+		this.ctx.lineJoin = 'round';
+		this.ctx.lineCap = 'round';
 		pen_container.addEventListener('click',() => {
 			if (!update){
 
@@ -376,8 +389,6 @@ class ToolBarNew{
 		let lastY = 0;
 		let isDrawing = false;
 
-		let canvas = document.getElementById('canvasid');
-		let ctx = canvas.getContext('2d');
 		const mouseDown = (e) =>{
 			isDrawing = true;
 			isActive = true;
@@ -390,17 +401,17 @@ class ToolBarNew{
 
 		const mouseUp = (e) =>{
 
-			ctx.strokeStyle = this.globalColor;
-			shape_creator["rectangle"](lastX, lastY, e.offsetX , e.offsetY, ctx);
-			HISTORY_STACK.push({ "shape": "rectangle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
+			this.ctx.strokeStyle = this.globalColor;
+			shape_creator["rectangle"](lastX, lastY, e.offsetX , e.offsetY, this.ctx);
+			HISTORY_STACK.push({ "shape": "rectangle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": this.ctx.lineWidth});
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
 
 		square_button.addEventListener('click',()=>{
 
 			canvas.style.cursor = 'crosshair';
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 
 			if (!isActive){
 				isActive = true;
@@ -429,35 +440,43 @@ class ToolBarNew{
 		icon.style.fontSize = '25px';
 
 		icon.style.cursor = 'pointer';
+		let isDrawing = false;
+		let isActive = false;
+		let lastX = 0;
+		let lastY = 0;
+		this.canvas.style.cursor = 'crosshair';
+
 		square_button.appendChild(icon);
 		circle_container.appendChild(square_button);
 		this.toolBox.appendChild(circle_container);
+		const mouseDown = (e) => {
+			isDrawing = true;
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		};
+		const mouseMove = (e) => {
+			if (!isDrawing) return;
+		};
+
+		const mouseUp = (e) => {
+			this.ctx.strokeStyle = this.globalColor;
+			shape_creator["circle"](lastX, lastY, e.offsetX, e.offsetY, this.ctx);
+			HISTORY_STACK.push({ "shape": "circle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": this.ctx.lineWidth});
+			[lastX, lastY] = [e.offsetX, e.offsetY]
+		};
 		circle_container.addEventListener('click', ()=>{
-			let canvas = document.getElementById('canvasid');
-			canvas.style.cursor = 'crosshair';
-			let lastX = 0;
-			let lastY = 0;
-			let isDrawing = false;
-			let ctx = canvas.getContext('2d');
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
-			canvas.addEventListener('mousedown', (e)=>{
-				isDrawing = true;
-
-				[lastX, lastY] = [e.offsetX, e.offsetY]
-			});
-
-			canvas.addEventListener('mousemove', ()=>{
-				if (!isDrawing) return;
-			});
-
-			canvas.addEventListener('mouseup',(e)=>{
-				ctx.strokeStyle = this.globalColor;
-				shape_creator["circle"](lastX, lastY, e.offsetX, e.offsetY, ctx);
-				HISTORY_STACK.push({ "shape": "circle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": lineWidth});
-				[lastX, lastY] = [e.offsetX, e.offsetY]
-
-			});
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
+			if (!isActive){
+				isActive = true;
+				canvas.addEventListener('mousedown', mouseDown);
+				canvas.addEventListener('mousemove', mouseMove);
+				canvas.addEventListener('mouseup', mouseUp);
+			}else {
+				canvas.style.cursor = 'pointer';
+				canvas.removeEventListener('mousedown', mouseDown);
+				canvas.removeEventListener('mousemove', mouseMove);
+				canvas.removeEventListener('mouseup', mouseUp);
+			}
 		})
 		return circle_container;
 	}
@@ -474,31 +493,31 @@ class ToolBarNew{
 		hexagon_container.appendChild(square_button);
 		this.toolBox.appendChild(hexagon_container);
 		square_button.addEventListener('click', ()=>{
-			this.ctx.lineJoin = 'round';
-			this.ctx.lineCap = 'round';
+			this.this.ctx.lineJoin = 'round';
+			this.this.ctx.lineCap = 'round';
 			let isDrawing = false;
 			let lastX = 0;
 			let lastY = 0;
 			this.canvas.addEventListener('mousedown', (e)=>{
 				isDrawing = true;
-				this.ctx.beginPath();
+				this.this.ctx.beginPath();
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 			});
 
 			this.canvas.addEventListener('mouseup', (e)=>{
-				this.ctx.strokeStyle = this.globalColor;
-				ctx.beginPath();
+				this.this.ctx.strokeStyle = this.globalColor;
+				this.ctx.beginPath();
 				for (let i = 0; i < 6; i++) {
 				  const angle = Math.PI / 3 * i;
 				  const x = centerX + size * Math.cos(angle);
 				  const y = centerY + size * Math.sin(angle);
 				  if (i === 0) {
-					ctx.moveTo(x, y);
+					this.ctx.moveTo(x, y);
 				  } else {
-					ctx.lineTo(x, y);
+					this.ctx.lineTo(x, y);
 				  }
 				}
-				ctx.closePath();
+				this.ctx.closePath();
 			});
 		});
 		return hexagon_container;
@@ -520,8 +539,6 @@ class ToolBarNew{
 		let lastY = 0;
 		let isDrawing = false;
 
-		let canvas = document.getElementById('canvasid');
-		let ctx = canvas.getContext('2d');
 		const mouseDown = (e) =>{
 			isDrawing = true;
 			isActive = true;
@@ -533,17 +550,17 @@ class ToolBarNew{
 		};
 
 		const mouseUp = (e) =>{
-			ctx.strokeStyle = this.globalColor;
-			shape_creator["triangle"](lastX,lastY, e.offsetX, e.offsetY, ctx);
-			HISTORY_STACK.push({ "shape": "triangle", "lineWidth": ctx.lineWidth, x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": lineWidth});
+			this.ctx.strokeStyle = this.globalColor;
+			shape_creator["triangle"](lastX,lastY, e.offsetX, e.offsetY, this.ctx);
+			HISTORY_STACK.push({ "shape": "triangle", "lineWidth": this.ctx.lineWidth, x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY });
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
 
 		square_button.addEventListener('click',()=>{
 
 			canvas.style.cursor = 'crosshair';
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 
 			if (!isActive){
 				isActive = true;
@@ -589,9 +606,7 @@ class ToolBarNew{
 			stroke.style.borderRadius = `50%`;
 			stroke.style.background = '#000';
 			stroke.addEventListener('click',()=>{
-				let canvas = document.getElementById('canvasid');
-				let ctx = canvas.getContext('2d');
-				ctx.lineWidth = `${x}`;
+				this.ctx.lineWidth = `${x}`;
 
 			});
 			strokeBoxDiv.appendChild(stroke);
@@ -617,20 +632,16 @@ class ToolBarNew{
 	
 		arrows_button.addEventListener('click',()=>{
 			console.log(HISTORY_STACK);
-			let canvas = document.getElementById('canvasid');
-			let ctx = canvas.getContext('2d');
-			ctx.strokeStyle = this.globalColor;
+			this.ctx.strokeStyle = this.globalColor;
 			canvas.style.cursor = 'crosshair';
 			let lastX = null;
 			let lastY = null;
 
 			let mouseDown = (e) => {
-				console.log(HISTORY_STACK);
-				console.log(ctx);
 				if (lastX & lastY){
 
-					HISTORY_STACK.push({ "shape": "line", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
-					shape_creator["line"](lastX, lastY, e.offsetX, e.offsetY, ctx);
+					HISTORY_STACK.push({ "shape": "line", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": this.ctx.lineWidth});
+					shape_creator["line"](lastX, lastY, e.offsetX, e.offsetY, this.ctx);
 					lastX = null;
 					lastY = null;
 					console.log('end -->', HISTORY_STACK);
@@ -671,9 +682,8 @@ class ToolBarNew{
 			let lastX = 0;
 			let lastY = 0;
 			let isDrawing = false;
-			let ctx = canvas.getContext('2d');
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 			let mouseDown = (e) => {
 				//when this is clicked it will get the info of 
 				//the drawing nearest to it 
@@ -688,20 +698,20 @@ class ToolBarNew{
 				}
 				let shape_params = proximity_arr.pop();
 				proximity = shape_params;
-				ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
-				ctx.beginPath();
-				ctx.rect(x, y, shape_params.length, shape_params.length);
-				ctx.stroke();
-				ctx.closePath();
+				this.ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
+				this.ctx.beginPath();
+				this.ctx.rect(x, y, shape_params.length, shape_params.length);
+				this.ctx.stroke();
+				this.ctx.closePath();
 				[lastX, lastY] = [x, y];
 			};
 			let mouseMove = (e) => {
 				if (!proximity) return;
-				ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
-				ctx.beginPath();
-				ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
-				ctx.stroke();
-				ctx.closePath();
+				this.ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
+				this.ctx.beginPath();
+				this.ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
+				this.ctx.stroke();
+				this.ctx.closePath();
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 			};
 			canvas.addEventListener('mousedown', mouseDown);
@@ -713,7 +723,7 @@ class ToolBarNew{
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 				proximity.x = lastX;
 				proximity.y = lastY;
-				HISTORY_STACK.push({ "shape": "rectangle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": ctx.lineWidth});
+				HISTORY_STACK.push({ "shape": "rectangle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": this.ctx.lineWidth});
 			});
 		})
 		return square_container;
@@ -739,9 +749,8 @@ class ToolBarNew{
 			let lastX = 0;
 			let lastY = 0;
 			let isDrawing = false;
-			let ctx = canvas.getContext('2d');
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 			let mouseDown = (e) => {
 				//when this is clicked it will get the info of 
 				//the drawing nearest to it 
@@ -756,20 +765,20 @@ class ToolBarNew{
 				}
 				let shape_params = proximity_arr.pop();
 				proximity = shape_params;
-				ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
-				ctx.beginPath();
-				ctx.rect(x, y, shape_params.length, shape_params.length);
-				ctx.stroke();
-				ctx.closePath();
+				this.ctx.clearRect(shape_params.x - 1, shape_params.y - 1, shape_params.length + 1, shape_params.length + 1);
+				this.ctx.beginPath();
+				this.ctx.rect(x, y, shape_params.length, shape_params.length);
+				this.ctx.stroke();
+				this.ctx.closePath();
 				[lastX, lastY] = [x, y];
 			};
 			let mouseMove = (e) => {
 				if (!proximity) return;
-				ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
-				ctx.beginPath();
-				ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
-				ctx.stroke();
-				ctx.closePath();
+				this.ctx.clearRect(lastX-1, lastY-1, proximity.length+1, proximity.length+1);
+				this.ctx.beginPath();
+				this.ctx.rect(e.offsetX, e.offsetY, proximity.length, proximity.length);
+				this.ctx.stroke();
+				this.ctx.closePath();
 				[lastX, lastY] = [e.offsetX, e.offsetY];
 			};
 			canvas.addEventListener('mousedown', mouseDown);
@@ -800,11 +809,9 @@ class ToolBarNew{
 		square_container.appendChild(eraser_button);
 		this.toolBox.appendChild(square_container);
 		eraser_button.addEventListener('click',()=>{
-			let canvas = document.getElementById('canvasid');
-			canvas.style.cursor = 'move';
-			let ctx = canvas.getContext('2d');
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.canvas.style.cursor = 'move';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 
 			let mouseDown = (e) => {
 				if (isErasing) return
@@ -815,7 +822,7 @@ class ToolBarNew{
 				let x = e.offsetX;
 				let y = e.offsetY;
 				console.log(x,y)
-				ctx.clearRect(x,y, area, area)
+				this.ctx.clearRect(x,y, area, area)
 			};
 			canvas.addEventListener('mousedown', mouseDown);
 			canvas.addEventListener('mousemove', mouseMove);
@@ -835,15 +842,13 @@ class ToolBarNew{
 		square_container.appendChild(selection_button);
 		this.toolBox.appendChild(square_container);
 		selection_button.addEventListener('click',(e)=>{
-			let canvas = document.getElementById('canvasid');
-			canvas.style.cursor = 'auto';
-			let ctx = canvas.getContext('2d');
+			this.canvas.style.cursor = 'auto';
 			let initialX = e.offsetX;
 			let initialY = e.offsetY;
 			let lastX = e.offsetX;
 			let lastY = e.offsetY;
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 			//TODO: after reclicking it startes drawing from the clicked area
 
 			let mouseDown = (e) => {
@@ -856,16 +861,16 @@ class ToolBarNew{
 			};
 			let mouseMove = (e) => {
 				if (!isSelecting) return
-				ctx.clearRect(initialX - 1, initialY - 1, initialX - lastX + 1, initialY - lastY + 1);
-				ctx.beginPath();
-				ctx.fillStyle = 'rgba(1,1,1,0.4)';
-				ctx.strokeStyle = 'blue';
-				ctx.lineWidth = 2;
-				ctx.fillRect(initialX-1, initialY-1, e.offsetX - initialX - 1, e.offsetY - initialY - 1);
-				ctx.rect(initialX, initialY, e.offsetX - initialX, e.offsetY - initialY);
+				this.ctx.clearRect(initialX - 1, initialY - 1, initialX - lastX + 1, initialY - lastY + 1);
+				this.ctx.beginPath();
+				this.ctx.fillStyle = 'rgba(1,1,1,0.4)';
+				this.ctx.strokeStyle = 'blue';
+				this.ctx.lineWidth = 2;
+				this.ctx.fillRect(initialX-1, initialY-1, e.offsetX - initialX - 1, e.offsetY - initialY - 1);
+				this.ctx.rect(initialX, initialY, e.offsetX - initialX, e.offsetY - initialY);
 				[lastX, lastY] = [e.offsetX, e.offsetY];
-				ctx.stroke();
-				ctx.closePath();
+				this.ctx.stroke();
+				this.ctx.closePath();
 			};
 
 			let mouseUp = () => {
@@ -894,22 +899,20 @@ class ToolBarNew{
 		square_container.appendChild(text_button);
 		this.toolBox.appendChild(square_container);
 		text_button.addEventListener('click',()=>{
-			let canvas = document.getElementById('canvasid');
-			let ctx = canvas.getContext('2d');
-			canvas.style.cursor = 'text';
+			this.canvas.style.cursor = 'text';
 			let lastX = 0;
 			let lastY = 0;
 			let word = '' //Array.from("");// buffer fro efficency
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 			let mouseDown = (e) => {
-				ctx.beginPath();
-				ctx.strokeStyle = this.globalColor;
+				this.ctx.beginPath();
+				this.ctx.strokeStyle = this.globalColor;
 				initialX = e.offsetX;
 				initialY = e.offsetY;
-				ctx.rect(e.offsetX, e.offsetY, 200, 10 );
-				ctx.stroke()
-				ctx.closePath()
+				this.ctx.rect(e.offsetX, e.offsetY, 200, 10 );
+				this.ctx.stroke()
+				this.ctx.closePath()
 
 			};
 
@@ -921,11 +924,11 @@ class ToolBarNew{
 				//need to save the char details for every cell
 				//for removing process
 				if (event.key.length == 1){
-					ctx.font = "20px sans-serif"
-					ctx.fillStyle = "white";
+					this.ctx.font = "20px sans-serif"
+					this.ctx.fillStyle = "white";
 					render(canvas);
 					word+=event.key
-					ctx.fillText(word, initialX, initialY+9);
+					this.ctx.fillText(word, initialX, initialY+9);
 				}
 				if (event.key === 'Escape'){
 					HISTORY_STACK.push({ "shape": "text", word, 'x': initialX, 'y': initialY+9 });
@@ -935,7 +938,7 @@ class ToolBarNew{
 				if (event.key === 'Backspace'){
 					word = word.slice(0,-1)
 					render(canvas)
-					ctx.fillText(word, initialX, initialY+9);
+					this.ctx.fillText(word, initialX, initialY+9);
 				}
 			};
 
@@ -957,22 +960,19 @@ class ToolBarNew{
 		square_container.appendChild(move_button);
 		this.toolBox.appendChild(square_container);
 		move_button.addEventListener('click',()=>{
-			let canvas = document.getElementById('canvasid');
-			canvas.style.cursor = 'move';
+			this.canvas.style.cursor = 'move';
 
 			let proximity_arr = new PriorityQueue();//min heap priority que
 			let proximity = null;
 			let lastX = 0;
 			let lastY = 0;
 			let isDrawing = false;
-			let ctx = canvas.getContext('2d');
-			ctx.lineJoin = 'round';
-			ctx.lineCap = 'round';
+			this.ctx.lineJoin = 'round';
+			this.ctx.lineCap = 'round';
 			let mouseDown = (e) => {
 				//when this is clicked it will get the info of 
 				//the drawing nearest to it 
 				//TODO:- complete priority que 
-				console.log("moving");
 				let x = e.offsetX;
 				let y = e.offsetY;
 				isDrawing = true;
@@ -994,7 +994,7 @@ class ToolBarNew{
 				if (!proximity) return;
 				render(canvas);
 				console.log('yay')
-				//shape_creator[proximity.shape](e.offsetX, e.offsetY, e.offsetX + (proximity.x2 - proximity.x1), e.offsetY + (proximity.y2 - proximity.y1), ctx);
+				//shape_creator[proximity.shape](e.offsetX, e.offsetY, e.offsetX + (proximity.x2 - proximity.x1), e.offsetY + (proximity.y2 - proximity.y1), this.ctx);
 				proximity.x2 = e.offsetX + (proximity.x2 - proximity.x1);
 				proximity.y2 = e.offsetY + (proximity.y2 - proximity.y1);
 				proximity.x1 = e.offsetX;
@@ -1051,9 +1051,7 @@ class ToolBarNew{
 		square_container.appendChild(save_button);
 		this.toolBox.appendChild(square_container);
 		save_button.addEventListener('change',()=>{
-			let canvas = document.getElementById('canvasid');
-			let ctx = canvas.getContext('2d');
-			ctx.strokeStyle = this.globalColor;
+			this.ctx.strokeStyle = this.globalColor;
 			const file = save_button.files[0];
 			if (file){
 				const reader = new FileReader();
