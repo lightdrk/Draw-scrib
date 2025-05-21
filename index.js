@@ -300,10 +300,10 @@ class ToolBarNew{
 	penTool(){
 		const pen_container = document.createElement('div');
 		pen_container.id = 'pen'
-		let update=false;
 		//let lastX = 0;
 		//let lastY = 0;
 		let isDrawing = false;
+		let isActive = false
 		let trace = null;
 		let mouseDown = (e)=>{
 			isDrawing = true;
@@ -337,20 +337,21 @@ class ToolBarNew{
 		this.ctx.lineJoin = 'round';
 		this.ctx.lineCap = 'round';
 		pen_container.addEventListener('click',() => {
-			if (!update){
+			console.log("why ", isActive)
+			if (!isActive){
 
-				update = true;
+				isActive = true;
 
-				canvas.addEventListener('mousedown', mouseDown);
-				canvas.addEventListener('mousemove', mouseMove);
-				canvas.addEventListener('mouseup', mouseUp);
+				this.canvas.addEventListener('mousedown', mouseDown);
+				this.canvas.addEventListener('mousemove', mouseMove);
+				this.canvas.addEventListener('mouseup', mouseUp);
 
 			}else{
-				x.style.cursor = 'auto';
-				canvas.removeEventListener('mousedown', mouseDown);
-				canvas.removeEventListener('mousemove', mouseMove);
-				canvas.removeEventListener('mouseup', mouseUp);
-				update = false;
+				this.canvas.style.cursor = 'auto';
+				this.canvas.removeEventListener('mousedown', mouseDown);
+				this.canvas.removeEventListener('mousemove', mouseMove);
+				this.canvas.removeEventListener('mouseup', mouseUp);
+				isActive = false;
 
 			}
 		});
@@ -644,18 +645,19 @@ class ToolBarNew{
 					shape_creator["line"](lastX, lastY, e.offsetX, e.offsetY, this.ctx);
 					lastX = null;
 					lastY = null;
-					console.log('end -->', HISTORY_STACK);
 
 					return
 				}
 				lastX = e.offsetX;
 				lastY = e.offsetY;
-				console.log('end -->',HISTORY_STACK);
 			};
 
 			if (! lineToolActive){
-				canvas.addEventListener('mousedown', mouseDown);
+				this.canvas.addEventListener('mousedown', mouseDown);
 				lineToolActive = true;
+			}else{
+				this.canvas.removeEventListener('mousedown', mouseDown);
+				lineToolActive = false;
 			}
 		})
 		return square_container;
@@ -889,9 +891,9 @@ class ToolBarNew{
 		let square_container = document.createElement('div');
 		const text_button = document.createElement('button');
 		var icon = document.createElement('i');
+		let isActive = false;
 		icon.innerText = 'T';
 		icon.style.fontSize = '25px';
-
 		let initialX = 0;
 		let initialY = 0;
 		icon.style.cursor = 'pointer';
@@ -941,9 +943,17 @@ class ToolBarNew{
 					this.ctx.fillText(word, initialX, initialY+9);
 				}
 			};
-
-			canvas.addEventListener('mousedown', mouseDown);
-			document.addEventListener('keydown', keyHandler);
+			if (!isActive){
+				console.log(isActive)
+				this.canvas.addEventListener('mousedown', mouseDown);
+				document.addEventListener('keydown', keyHandler);
+				isActive = true;
+			}else{
+				console.log(isActive)
+				this.canvas.removeEventListener('mousedown', mouseDown);
+				document.removeEventListener('keydown', keyHandler);
+				isActive = false;
+			}
 		})
 		return square_container;
 	}
