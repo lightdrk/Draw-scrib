@@ -356,11 +356,13 @@ class ToolBarNew{
 			}
 		});
 		const pen_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-pen';
-		icon.style.fontSize = '25px';
-		icon.style.cursor = 'pointer';
-		pen_button.appendChild(icon);
+		pen_button.style.cursor = 'pointer';
+		pen_button.title = 'Pen Tool'
+		pen_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
+ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-
+7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11
+" r="2"></circle></svg>`;
 		pen_container.appendChild(pen_button);
 		this.toolBox.appendChild(pen_container);
 
@@ -376,12 +378,10 @@ class ToolBarNew{
 	squareTool(){
 		let square_container = document.createElement('div');
 		const square_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-square';
-		icon.style.fontSize = '25px';
-
-		icon.style.cursor = 'pointer';
-		square_button.appendChild(icon);
+		square_button.style.cursor = 'pointer';
+		square_button.title = 'Square Tool';
+		square_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-square">
+			<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`
 		square_container.appendChild(square_button);
 		this.toolBox.appendChild(square_container);
 		let isActive = false;
@@ -436,18 +436,17 @@ class ToolBarNew{
 	circleTool(){
 		let circle_container = document.createElement('div');
 		const square_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-circle';
-		icon.style.fontSize = '25px';
-
-		icon.style.cursor = 'pointer';
+		square_button.style.cursor = 'pointer';
+		square_button.title = 'Circle Tool';
 		let isDrawing = false;
 		let isActive = false;
 		let lastX = 0;
 		let lastY = 0;
 		this.canvas.style.cursor = 'crosshair';
 
-		square_button.appendChild(icon);
+		square_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
+ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
 		circle_container.appendChild(square_button);
 		this.toolBox.appendChild(circle_container);
 		const mouseDown = (e) => {
@@ -527,12 +526,10 @@ class ToolBarNew{
 	triangleTool(){
 		let triangle_container = document.createElement('div');
 		const square_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-caret-up';
-		icon.style.fontSize = '30px';
-		icon.style.scale = '1.3';
-		icon.style.cursor = 'pointer';
-		square_button.appendChild(icon);
+		square_button.style.cursor = 'pointer';
+		square_button.title = 'Triangle tool';
+		square_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-
+linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>`;
 		triangle_container.appendChild(square_button);
 		this.toolBox.appendChild(triangle_container);
 		let isActive = false;
@@ -835,12 +832,13 @@ class ToolBarNew{
 	selectionTool(){
 		let square_container = document.createElement('div');
 		const selection_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-mouse-pointer';
-		icon.style.fontSize = '25px';
 		let isSelecting = false;
-		icon.style.cursor = 'pointer';
-		selection_button.appendChild(icon);
+		selection_button.style.cursor = 'pointer';
+		selection_button.title = 'Selection tool';
+		selection_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
+ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path
+><path d="M13 13l6 6"></path></svg>`;
 		square_container.appendChild(selection_button);
 		this.toolBox.appendChild(square_container);
 		selection_button.addEventListener('click',(e)=>{
@@ -890,59 +888,58 @@ class ToolBarNew{
 	textTool(){
 		let square_container = document.createElement('div');
 		const text_button = document.createElement('button');
-		var icon = document.createElement('i');
 		let isActive = false;
-		icon.innerText = 'T';
-		icon.style.fontSize = '25px';
 		let initialX = 0;
 		let initialY = 0;
-		icon.style.cursor = 'pointer';
-		text_button.appendChild(icon);
+		text_button.style.cursor = 'pointer';
+		text_button.title = "Text tool";
+		text_button.innerHTML+= `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-type"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>`;
 		square_container.appendChild(text_button);
 		this.toolBox.appendChild(square_container);
+		let word = ''
+		let mouseDown = (e) => {
+			this.ctx.beginPath();
+			this.ctx.strokeStyle = this.globalColor;
+			initialX = e.offsetX;
+			initialY = e.offsetY;
+			this.ctx.rect(e.offsetX, e.offsetY, 200, 10 );
+			this.ctx.stroke()
+			this.ctx.closePath()
+
+		};
+
+		const keyHandler = (event)=>{
+			console.log(event.key)
+			//TODO:
+			//half of the font size should be added to move 
+			//the char 
+			//need to save the char details for every cell
+			//for removing process
+			if (event.key.length == 1){
+				this.ctx.font = "20px sans-serif"
+				this.ctx.fillStyle = "white";
+				render(canvas);
+				word+=event.key
+				this.ctx.fillText(word, initialX, initialY+9);
+			}
+			if (event.key === 'Escape'){
+				HISTORY_STACK.push({ "shape": "text", word, 'x': initialX, 'y': initialY+9 });
+				document.removeEventListener( 'keydown', keyHandler);
+			}
+
+			if (event.key === 'Backspace'){
+				word = word.slice(0,-1)
+				render(canvas)
+				this.ctx.fillText(word, initialX, initialY+9);
+			}
+		};
 		text_button.addEventListener('click',()=>{
 			this.canvas.style.cursor = 'text';
-			let lastX = 0;
-			let lastY = 0;
-			let word = '' //Array.from("");// buffer fro efficency
 			this.ctx.lineJoin = 'round';
 			this.ctx.lineCap = 'round';
-			let mouseDown = (e) => {
-				this.ctx.beginPath();
-				this.ctx.strokeStyle = this.globalColor;
-				initialX = e.offsetX;
-				initialY = e.offsetY;
-				this.ctx.rect(e.offsetX, e.offsetY, 200, 10 );
-				this.ctx.stroke()
-				this.ctx.closePath()
 
-			};
 
-			const keyHandler = (event)=>{
-				console.log(event.key)
-				//TODO:
-				//half of the font size should be added to move 
-				//the char 
-				//need to save the char details for every cell
-				//for removing process
-				if (event.key.length == 1){
-					this.ctx.font = "20px sans-serif"
-					this.ctx.fillStyle = "white";
-					render(canvas);
-					word+=event.key
-					this.ctx.fillText(word, initialX, initialY+9);
-				}
-				if (event.key === 'Escape'){
-					HISTORY_STACK.push({ "shape": "text", word, 'x': initialX, 'y': initialY+9 });
-					document.removeEventListener( 'keydown', keyHandler);
-				}
 
-				if (event.key === 'Backspace'){
-					word = word.slice(0,-1)
-					render(canvas)
-					this.ctx.fillText(word, initialX, initialY+9);
-				}
-			};
 			if (!isActive){
 				console.log(isActive)
 				this.canvas.addEventListener('mousedown', mouseDown);
@@ -961,12 +958,15 @@ class ToolBarNew{
 	moveTool(){
 		let square_container = document.createElement('div');
 		const move_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-arrows';
-		icon.style.fontSize = '25px';
 
-		icon.style.cursor = 'pointer';
-		move_button.appendChild(icon);
+		move_button.style.cursor = 'pointer';
+		move_button.title = 'Move tool';
+		move_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
+ss="feather feather-move"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 
+12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 
+22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2=
+"12" y2="22"></line></svg>`;
 		square_container.appendChild(move_button);
 		this.toolBox.appendChild(square_container);
 		move_button.addEventListener('click',()=>{
@@ -1026,6 +1026,7 @@ class ToolBarNew{
 		let square_container = document.createElement('div');
 		const save_button = document.createElement('button');
 		var icon = document.createElement('i');
+		save_button.title = 'Save tool to save current file'
 		icon.className = 'fa fa-save';
 		icon.style.fontSize = '25px';
 
