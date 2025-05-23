@@ -70,6 +70,46 @@ class PriorityQueue{
 }
 
 
+class HTML {
+	button(svg, name){
+		const pen_button = document.createElement('button');
+		pen_button.style.cursor = 'pointer';
+		pen_button.style.width = "100%";
+		pen_button.style.background = "transparent";
+		pen_button.style.border = "none";
+		pen_button.style.margin = "12px 0";
+		pen_button.style.borderRadius = "14px";
+		pen_button.style.display = "flex";
+		pen_button.style.alignItems = "center";
+		pen_button.style.padding = "10px 14px";
+		pen_button.style.gap = "14px";
+		pen_button.style.transition = "all 0.3s ease";
+		pen_button.style.whiteSpace = "nowrap";
+		pen_button.style.color = "#fff"
+		pen_button.title = name;
+		pen_button.innerHTML+=svg
+
+		const name_span = document.createElement('span');
+		name_span.innerText = name;
+
+		pen_button.addEventListener('mouseover', () => { 
+			pen_button.style.background = 'rgba(255,255,255,0.1)';
+
+			pen_button.appendChild(name_span);
+		});
+		pen_button.addEventListener('mouseout', () => { 
+			pen_button.style.background = 'transparent';
+			pen_button.removeChild(name_span)
+		});
+
+		return pen_button;
+	}
+
+
+}
+
+const html = new HTML();
+
 function distance(x1,y1, x2,y2){
 	return (x2-x1)**2 + (y2-y1)**2;
 
@@ -145,23 +185,6 @@ function canvas_element(){
 	return canvas
 }
 
-function slider(){
-	const slider_container = document.createElement('div');
-	const input_slider = document.createElement('input');
-	slider_container.appendChild(input_slider);
-	input_slider.type = 'range';
-	input_slider.id = "slider";
-	input_slider.min = '0.0';
-	input_slider.max = '1.0';
-	input_slider.step = '0.1';
-	input_slider.value = '0.5';
-	input_slider.style.zIndex = '99999';
-	slider_container.style.backgroundColor = '#fff';
-	slider_container.style.position = 'absolute';
-	slider_container.style.zIndex = '999999';
-	return slider_container;
-}
-
 function render(canvas){
 	let ctx = canvas.getContext('2d');
 	ctx.clearRect(0,0, canvas.width, canvas.height);
@@ -205,23 +228,11 @@ function movement(proximity, x, y){
 
 
 let canvas = canvas_element();
-let slid = slider()
 
 
 div.appendChild(canvas);
 
-div.appendChild(slid);
 page.appendChild(div)
-let slider_for_event = document.getElementById('slider');
-if (slider_for_event){
-	console.log(slider_for_event);
-	slider_for_event.addEventListener('change', (e) => {
-		console.log(e)
-		let opacity = e.target.value;
-		console.log(opacity);
-		canvas.style.opacity = ''+opacity;
-	})
-}
 
 class ToolBarNew{
 	constructor(){
@@ -236,33 +247,40 @@ class ToolBarNew{
 	outerBox(){
 		this.moverBox.style.padding = '5px';
 		this.moverBox.style.backgroundColor = 'rgba(0,0,0,0.5)';
+
 		this.moverBox.style.cursor = 'move';
 		this.toolBox.style.flexDirection = 'column';
-		this.toolBox.style.backgroundColor = 'rgba(244,244,244,1)';
+		this.toolBox.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+		this.toolBox.style.border = '1px solid rgba(255,255,255,0.1)';
+		this.toolBox.style.borderRadius = '16px';
+		this.toolBox.style.backdropFilter = 'blur(12px) saturate(180%)';
+		this.toolBox.style.boxShadow = '0 0 30px rgba(0,0,0,0.5)';
+		this.toolBox.style.padding = '12px 6px';
+		this.toolBox.style.alignItems = 'center';
+		this.toolBox.style.overflow = 'hidden';
+		this.toolBox.style.cursor = 'move';
 		this.toolBox.id = 'tool-box';
 		this.toolBox.style.position = 'absolute';
 		this.toolBox.style.zIndex = '999999';
 		this.toolBox.style.display = 'flex';
-		this.toolBox.style.justifyContent = 'space-between';
+		//this.toolBox.style.justifyContent = 'space-between';
 		this.toolBox.style.top = '0';
 		this.toolBox.style.border = '1px solid';
+		this.toolBox.style.left = "100px";
+		this.toolBox.style.right = "100px";
+		this.toolBox.style.width = '50px';
 		//this.moverBox.appendChild(this.toolBox);
 		this.toolBox.appendChild(this.moverBox);
-		return this.toolBox;
-	}
-
-	outerBoxMove(){
 		let isDragging = false;
 		let offsetX = '500';
-		let offsetY = '500'
-
-		this.moverBox.addEventListener('mousedown', (e)=>{
+		let offsetY = '500';
+		this.toolBox.addEventListener('mousedown', (e)=>{
 			e.preventDefault();
 			isDragging = true;
 			offsetX = e.clientX - this.toolBox.offsetLeft;
 			offsetY = e.clientY - this.toolBox.offsetTop;
-		});
 
+		});
 		document.addEventListener('mousemove', (e)=>{
 			if (isDragging){
 				let x = e.clientX - offsetX;
@@ -272,10 +290,10 @@ class ToolBarNew{
 				this.toolBox.style.left = `${x}px`;
 			}
 		});
-
 		document.addEventListener('mouseup', ()=>{
 			isDragging = false;
 		});
+		return this.toolBox;
 	}
 
 	canvasOpacityController(){
@@ -355,16 +373,33 @@ class ToolBarNew{
 
 			}
 		});
-		const pen_button = document.createElement('button');
-		pen_button.style.cursor = 'pointer';
-		pen_button.title = 'Pen Tool'
-		pen_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+		let svg1 = `
+			<svg xmlns="http://www.w3.org/2000/svg"
+			     viewBox="0 0 24 24"
+			     fill="none"
+			     stroke="currentColor"
+			     stroke-width="2"
+			     stroke-linecap="round"
+			     stroke-linejoin="round"
+			     preserveAspectRatio="xMidYMid meet"
+			     style="width: 100%; height: auto;"
+			     class="feather feather-pen-tool">
+			  <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+			  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+			  <path d="M2 2l7.586 7.586"></path>
+			  <circle cx="11" cy="11" r="2"></circle>
+			</svg>
+		`
+
+		let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
 e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
 ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-
 7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11
 " r="2"></circle></svg>`;
-		pen_container.appendChild(pen_button);
-		this.toolBox.appendChild(pen_container);
+		let name = 'Pen Tool';
+
+		const pen_button = html.button(svg1, name)//document.createElement('button');
+		this.toolBox.appendChild(pen_button);
 
 		return pen_container;
 	}
@@ -593,22 +628,22 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 
 	strokeBox(){
 		let strokeBoxDiv = document.createElement('div');
+		const input_slider = document.createElement('input');
+		input_slider.type = 'range';
+		input_slider.id = "slider";
+		input_slider.min = '1';
+		input_slider.max = '10';
+		input_slider.step = '1';
+		input_slider.value = '1';
 		strokeBoxDiv.style.display = 'flex';
 		strokeBoxDiv.style.alignItems = 'center';
 		strokeBoxDiv.style.justifyContent = 'space-between';
-		for (let x=5; x <= 20 ;x+=5){
-			let stroke = document.createElement('div');
-			stroke.style.width = `${x}px`;
-			stroke.style.height = `${x}px`;
-			stroke.style.cursor = 'pointer';
-			stroke.style.borderRadius = `50%`;
-			stroke.style.background = '#000';
-			stroke.addEventListener('click',()=>{
-				this.ctx.lineWidth = `${x}`;
+		let current = input_slider.value;
+		input_slider.addEventListener('change', (e) => {
+			this.ctx.lineWidth = e.target.value*current;
 
-			});
-			strokeBoxDiv.appendChild(stroke);
-		}
+		});
+		strokeBoxDiv.appendChild(input_slider);
 		this.toolBox.appendChild(strokeBoxDiv);
 		return strokeBoxDiv;
 	}
@@ -1080,6 +1115,26 @@ ss="feather feather-move"><polyline points="5 9 2 12 5 15"></polyline><polyline 
 		return square_container;
 	}
 
+	opacityTool(){
+		const slider_container = document.createElement('div');
+		const input_slider = document.createElement('input');
+		slider_container.appendChild(input_slider);
+		input_slider.type = 'range';
+		input_slider.id = "slider";
+		input_slider.min = '0.0';
+		input_slider.max = '1.0';
+		input_slider.step = '0.1';
+		input_slider.value = '0.5';
+		slider_container.style.backgroundColor = '#fff';
+
+		this.toolBox.appendChild(slider_container);
+		input_slider.addEventListener('change', (e) => {
+			let opacity = e.target.value;
+			this.canvas.style.opacity = ''+opacity;
+		});
+
+	}
+
 }
 
 document.addEventListener('keydown', (event)=>{
@@ -1152,5 +1207,5 @@ tool_box.textTool();
 tool_box.selectionTool();
 tool_box.strokeBox();
 div.appendChild(tool_box.outerBox());
-tool_box.outerBoxMove();
+tool_box.opacityTool();
 
