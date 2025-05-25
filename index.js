@@ -77,11 +77,11 @@ class HTML {
 		pen_button.style.width = "100%";
 		pen_button.style.background = "transparent";
 		pen_button.style.border = "none";
-		pen_button.style.margin = "12px 0";
+		pen_button.style.margin = "5px 0";
 		pen_button.style.borderRadius = "14px";
 		pen_button.style.display = "flex";
 		pen_button.style.alignItems = "center";
-		pen_button.style.padding = "10px 14px";
+		pen_button.style.padding = "5px 7px";
 		pen_button.style.gap = "14px";
 		pen_button.style.transition = "all 0.3s ease";
 		pen_button.style.whiteSpace = "nowrap";
@@ -236,19 +236,16 @@ page.appendChild(div)
 
 class ToolBarNew{
 	constructor(){
-		this.moverBox = document.createElement('div');
 		this.toolBox = document.createElement('div');
 		this.corner = document.createElement('div');
 		this.canvas = document.getElementById('canvasid');
 		this.ctx = this.canvas.getContext('2d');
+		this.globalheight = '25px';
+		this.globalWidth = '25px';
 		this.globalColor = 'rgba(255,255,255,1)';
 	}
 
 	outerBox(){
-		this.moverBox.style.padding = '5px';
-		this.moverBox.style.backgroundColor = 'rgba(0,0,0,0.5)';
-
-		this.moverBox.style.cursor = 'move';
 		this.toolBox.style.flexDirection = 'column';
 		this.toolBox.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
 		this.toolBox.style.border = '1px solid rgba(255,255,255,0.1)';
@@ -270,15 +267,21 @@ class ToolBarNew{
 		this.toolBox.style.right = "100px";
 		this.toolBox.style.width = '50px';
 		//this.moverBox.appendChild(this.toolBox);
-		this.toolBox.appendChild(this.moverBox);
 		let isDragging = false;
 		let offsetX = '500';
 		let offsetY = '500';
+		this.toolBox.addEventListener('mouseover', (e)=>{
+			this.toolBox.style.width = '150px';
+		});
+		this.toolBox.addEventListener('mouseout', ()=>{
+			this.toolBox.style.width = '50px';
+		});
 		this.toolBox.addEventListener('mousedown', (e)=>{
 			e.preventDefault();
 			isDragging = true;
 			offsetX = e.clientX - this.toolBox.offsetLeft;
 			offsetY = e.clientY - this.toolBox.offsetTop;
+
 
 		});
 		document.addEventListener('mousemove', (e)=>{
@@ -292,6 +295,7 @@ class ToolBarNew{
 		});
 		document.addEventListener('mouseup', ()=>{
 			isDragging = false;
+			this.toolBox.style.width = '100px';
 		});
 		return this.toolBox;
 	}
@@ -316,8 +320,6 @@ class ToolBarNew{
 	}
 
 	penTool(){
-		const pen_container = document.createElement('div');
-		pen_container.id = 'pen'
 		//let lastX = 0;
 		//let lastY = 0;
 		let isDrawing = false;
@@ -327,7 +329,6 @@ class ToolBarNew{
 			isDrawing = true;
 			this.ctx.beginPath();
 			if (!trace){
-				console.log('1')
 				trace = [];
 			}
 			trace.push([e.offsetX, e.offsetY]);
@@ -354,25 +355,7 @@ class ToolBarNew{
 		this.canvas.style.cursor = 'crosshair';
 		this.ctx.lineJoin = 'round';
 		this.ctx.lineCap = 'round';
-		pen_container.addEventListener('click',() => {
-			console.log("why ", isActive)
-			if (!isActive){
 
-				isActive = true;
-
-				this.canvas.addEventListener('mousedown', mouseDown);
-				this.canvas.addEventListener('mousemove', mouseMove);
-				this.canvas.addEventListener('mouseup', mouseUp);
-
-			}else{
-				this.canvas.style.cursor = 'auto';
-				this.canvas.removeEventListener('mousedown', mouseDown);
-				this.canvas.removeEventListener('mousemove', mouseMove);
-				this.canvas.removeEventListener('mouseup', mouseUp);
-				isActive = false;
-
-			}
-		});
 		let svg1 = `
 			<svg xmlns="http://www.w3.org/2000/svg"
 			     viewBox="0 0 24 24"
@@ -382,7 +365,7 @@ class ToolBarNew{
 			     stroke-linecap="round"
 			     stroke-linejoin="round"
 			     preserveAspectRatio="xMidYMid meet"
-			     style="width: 100%; height: auto;"
+			     style="width: 24px; height: 24px;"
 			     class="feather feather-pen-tool">
 			  <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
 			  <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
@@ -399,9 +382,22 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 		let name = 'Pen Tool';
 
 		const pen_button = html.button(svg1, name)//document.createElement('button');
+		pen_button.addEventListener('click',() => {	
+			if (!isActive){
+				isActive = true;
+				this.canvas.addEventListener('mousedown', mouseDown);
+				this.canvas.addEventListener('mousemove', mouseMove);
+				this.canvas.addEventListener('mouseup', mouseUp);
+			}else{
+				this.canvas.style.cursor = 'auto';
+				this.canvas.removeEventListener('mousedown', mouseDown);
+				this.canvas.removeEventListener('mousemove', mouseMove);
+				this.canvas.removeEventListener('mouseup', mouseUp);
+				isActive = false;
+			}
+		});
 		this.toolBox.appendChild(pen_button);
-
-		return pen_container;
+		return pen_button;
 	}
 
 	toolContainer(){
@@ -411,14 +407,10 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 	}
 
 	squareTool(){
-		let square_container = document.createElement('div');
-		const square_button = document.createElement('button');
-		square_button.style.cursor = 'pointer';
-		square_button.title = 'Square Tool';
-		square_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-square">
+		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-square">
 			<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`
-		square_container.appendChild(square_button);
-		this.toolBox.appendChild(square_container);
+		const square_button = html.button(svg,'Square Tool');
+		this.toolBox.appendChild(square_button);
 		let isActive = false;
 
 		let lastX = 0;
@@ -464,26 +456,21 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 			}
 
 		})
-		return square_container;
+		return square_button;
 	}
 
 
 	circleTool(){
-		let circle_container = document.createElement('div');
-		const square_button = document.createElement('button');
-		square_button.style.cursor = 'pointer';
-		square_button.title = 'Circle Tool';
+		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
+ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
+		const circle_button = html.button(svg, 'Circle Tool');
 		let isDrawing = false;
 		let isActive = false;
 		let lastX = 0;
 		let lastY = 0;
 		this.canvas.style.cursor = 'crosshair';
-
-		square_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
-e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
-ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
-		circle_container.appendChild(square_button);
-		this.toolBox.appendChild(circle_container);
+		this.toolBox.appendChild(circle_button);
 		const mouseDown = (e) => {
 			isDrawing = true;
 			[lastX, lastY] = [e.offsetX, e.offsetY]
@@ -498,7 +485,7 @@ ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
 			HISTORY_STACK.push({ "shape": "circle", x2: e.offsetX, y2: e.offsetY, x1: lastX, y1: lastY, "lineWidth": this.ctx.lineWidth});
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
-		circle_container.addEventListener('click', ()=>{
+		circle_button.addEventListener('click', ()=>{
 			this.ctx.lineJoin = 'round';
 			this.ctx.lineCap = 'round';
 			if (!isActive){
@@ -513,7 +500,7 @@ ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
 				canvas.removeEventListener('mouseup', mouseUp);
 			}
 		})
-		return circle_container;
+		return circle_button;
 	}
 
 	hexagonTool(){
@@ -559,14 +546,10 @@ ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
 	}
 
 	triangleTool(){
-		let triangle_container = document.createElement('div');
-		const square_button = document.createElement('button');
-		square_button.style.cursor = 'pointer';
-		square_button.title = 'Triangle tool';
-		square_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-
+		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-
 linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>`;
-		triangle_container.appendChild(square_button);
-		this.toolBox.appendChild(triangle_container);
+		const triangle_button = html.button(svg, 'Triangle Tool');
+		this.toolBox.appendChild(triangle_button);
 		let isActive = false;
 		let lastX = 0;
 		let lastY = 0;
@@ -589,7 +572,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 			[lastX, lastY] = [e.offsetX, e.offsetY]
 		};
 
-		square_button.addEventListener('click',()=>{
+		triangle_button.addEventListener('click',()=>{
 
 			canvas.style.cursor = 'crosshair';
 			this.ctx.lineJoin = 'round';
@@ -610,7 +593,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 			}
 
 		})
-		return triangle_container;
+		return triangle_button;
 	}
 
 	colorBox(){
@@ -649,21 +632,25 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	}
 
 	lineTool(){
-		let square_container = document.createElement('div');
-		const arrows_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-minus';
-		icon.style.fontSize = '25px';
+		let svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+		  <!-- Point A -->
+		  <circle cx="50" cy="50" r="5" fill="black" />
+		  
+		  <!-- Point B -->
+		  <circle cx="150" cy="150" r="5" fill="black" />
 
-		icon.style.cursor = 'pointer';
-		arrows_button.appendChild(icon);
-		square_container.appendChild(arrows_button);
-		this.toolBox.appendChild(square_container);
-
+		  <!-- Dotted Line -->
+		  <line x1="2" y1="2" x2="20" y2="20" 
+			stroke="black" stroke-width="2" 
+			stroke-dasharray="2,5" />
+		</svg>
+		`
+		const line_button = html.button(svg, 'Line Join');
+		this.toolBox.appendChild(line_button);
 
 		let lineToolActive = false;
 	
-		arrows_button.addEventListener('click',()=>{
+		line_button.addEventListener('click',()=>{
 			console.log(HISTORY_STACK);
 			this.ctx.strokeStyle = this.globalColor;
 			canvas.style.cursor = 'crosshair';
@@ -692,7 +679,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 				lineToolActive = false;
 			}
 		})
-		return square_container;
+		return line_button;
 	}
 
 
@@ -831,17 +818,25 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	}
 
 	eraserTool(){
-		let square_container = document.createElement('div');
-		const eraser_button = document.createElement('button');
-		var icon = document.createElement('i');
-		icon.className = 'fa fa-eraser';
-		icon.style.fontSize = '25px';
+		let svg = `<svg fill="#000000" height="25px" width="25px" version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+          viewBox="-1117 883 256 256" xml:space="preserve">
+<path d="M-1016.4,1091.3l113.9-113.9c13.5-13.5,13.5-35.3,0-48.8l-32.5-32.5c-13.5-13.5-35.3-13.5-48.8,0l-113.9,113.9
+        c-13.5,13.5-13.5,35.3,0,48.8l32.5,32.5C-1051.7,1104.8-1029.9,1104.8-1016.4,1091.3z M-1057.1,1083.2l-32.5-32.5
+        c-9-9-9-23.6,0-32.5l67.6-68.1l65.1,65.1l-67.6,68.1c-4.3,4.3-10.1,6.7-16.3,6.7C-1046.9,1089.9-1052.7,1087.6-1057.1,1083.2z
+         M-954.3,1129.7c0,3.5-2.8,6.3-6.3,6.3h-89.3c-3.5,0-6.3-2.8-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3h89.3
+        C-957.1,1123.4-954.3,1126.2-954.3,1129.7z M-882.3,1129.7c0,3.4-2.9,6.3-6.3,6.3c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3
+        C-885.2,1123.4-882.3,1126.2-882.3,1129.7z M-907.5,1129.7c0,3.4-2.9,6.3-6.3,6.3c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3
+        C-910.4,1123.4-907.5,1126.2-907.5,1129.7z M-932.7,1129.7c0,3.4-2.9,6.3-6.3,6.3c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3
+        C-935.6,1123.4-932.7,1126.2-932.7,1129.7z M-944.5,1107.9c0,3.5-2.8,6.3-6.3,6.3h-51.1c-3.5,0-6.3-2.8-6.3-6.3
+        c0-3.5,2.8-6.3,6.3-6.3h51.1C-947.4,1101.6-944.5,1104.4-944.5,1107.9z M-894.9,1107.9c0,3.4-2.9,6.3-6.3,6.3
+        c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3C-897.8,1101.6-894.9,1104.4-894.9,1107.9z M-920.1,1107.9c0,3.4-2.9,6.3-6.3,6.3
+        c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3C-923,1101.6-920.1,1104.4-920.1,1107.9z M-869.6,1107.9c0,3.4-2.9,6.3-6.3,6.3
+        c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3C-872.6,1101.6-869.6,1104.4-869.6,1107.9z"/>
+</svg>` 
+		const eraser_button = html.button(svg, 'Eraser Tool');
 		let area = 20;
 		let isErasing = false;
-		icon.style.cursor = 'pointer';
-		eraser_button.appendChild(icon);
-		square_container.appendChild(eraser_button);
-		this.toolBox.appendChild(square_container);
+		this.toolBox.appendChild(eraser_button);
 		eraser_button.addEventListener('click',()=>{
 			this.canvas.style.cursor = 'move';
 			this.ctx.lineJoin = 'round';
@@ -861,21 +856,17 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 			canvas.addEventListener('mousedown', mouseDown);
 			canvas.addEventListener('mousemove', mouseMove);
 		})
-		return square_container;
+		return eraser_button;
 	}
 
 	selectionTool(){
-		let square_container = document.createElement('div');
-		const selection_button = document.createElement('button');
-		let isSelecting = false;
-		selection_button.style.cursor = 'pointer';
-		selection_button.title = 'Selection tool';
-		selection_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
 e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
 ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path
 ><path d="M13 13l6 6"></path></svg>`;
-		square_container.appendChild(selection_button);
-		this.toolBox.appendChild(square_container);
+		const selection_button = html.button(svg, 'Selection Tool');
+		let isSelecting = false;
+		this.toolBox.appendChild(selection_button);
 		selection_button.addEventListener('click',(e)=>{
 			this.canvas.style.cursor = 'auto';
 			let initialX = e.offsetX;
@@ -917,20 +908,17 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 			canvas.addEventListener('mousemove', mouseMove);
 			canvas.addEventListener('mouseup', mouseUp);
 		})
-		return square_container;
+		return selection_button;
 	}
 
 	textTool(){
-		let square_container = document.createElement('div');
-		const text_button = document.createElement('button');
+		let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-type"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>`;
+		const text_button = html.button(svg, 'Text Tool');
 		let isActive = false;
 		let initialX = 0;
 		let initialY = 0;
-		text_button.style.cursor = 'pointer';
-		text_button.title = "Text tool";
-		text_button.innerHTML+= `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-type"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>`;
-		square_container.appendChild(text_button);
-		this.toolBox.appendChild(square_container);
+
+		this.toolBox.appendChild(text_button);
 		let word = ''
 		let mouseDown = (e) => {
 			this.ctx.beginPath();
@@ -987,23 +975,19 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 				isActive = false;
 			}
 		})
-		return square_container;
+		return text_button;
 	}
 
 	moveTool(){
-		let square_container = document.createElement('div');
-		const move_button = document.createElement('button');
+		let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
+			e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
+			ss="feather feather-move"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 
+			12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 
+			22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2=
+			"12" y2="22"></line></svg>`;
+		const move_button = html.button(svg, 'Move Tool');
 
-		move_button.style.cursor = 'pointer';
-		move_button.title = 'Move tool';
-		move_button.innerHTML+=`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
-e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
-ss="feather feather-move"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 
-12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 
-22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2=
-"12" y2="22"></line></svg>`;
-		square_container.appendChild(move_button);
-		this.toolBox.appendChild(square_container);
+		this.toolBox.appendChild(move_button);
 		move_button.addEventListener('click',()=>{
 			this.canvas.style.cursor = 'move';
 
@@ -1054,7 +1038,7 @@ ss="feather feather-move"><polyline points="5 9 2 12 5 15"></polyline><polyline 
 				proximity = null;
 			});
 		})
-		return square_container;
+		return move_button;
 	}
 
 	saveTool(){
