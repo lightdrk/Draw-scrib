@@ -105,6 +105,30 @@ class HTML {
 		return pen_button;
 	}
 
+	range_input(name, min, max, step='0.1', value='0.5', func){
+		const input_slider = document.createElement('input');
+		input_slider.type = 'range';
+		input_slider.id = "slider";
+		input_slider.min = min;
+		input_slider.max = max;
+		input_slider.step = step;
+		input_slider.value = value;
+		input_slider.title = name;
+		input_slider.style.width = '100%';
+		input_slider.style.height = 'auto';
+		input_slider.style.zIndex = '2';
+		input_slider.addEventListener('change', func); 
+		return input_slider;
+	}
+	
+	color_input(func){
+		const colorInput = document.createElement('input');
+		colorInput.id = "color-picker"
+		colorInput.setAttribute('type', 'color');
+		colorInput.addEventListener('input', func);
+		return colorInput;
+	}
+
 
 }
 
@@ -597,54 +621,34 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	}
 
 	colorBox(){
-		let colorBoxDiv = document.createElement('div');
-		const colorInput = document.createElement('input');
-		colorInput.id = "color-picker"
-		colorInput.setAttribute('type', 'color');
-		colorBoxDiv.appendChild(colorInput);
-		this.toolBox.appendChild(colorBoxDiv);
-		colorInput.addEventListener('input', (e)=>{
+		function onChange(e){
 			this.globalColor = e.target.value;
-		});
-		return colorBoxDiv;
+		}
+		const colorInput = html.color_input(onChange);
+		this.toolBox.appendChild(colorInput);
+		return colorInput;
 	}
 
 	strokeBox(){
-		let strokeBoxDiv = document.createElement('div');
-		const input_slider = document.createElement('input');
-		input_slider.type = 'range';
-		input_slider.id = "slider";
-		input_slider.min = '1';
-		input_slider.max = '10';
-		input_slider.step = '1';
-		input_slider.value = '1';
-		strokeBoxDiv.style.display = 'flex';
-		strokeBoxDiv.style.alignItems = 'center';
-		strokeBoxDiv.style.justifyContent = 'space-between';
-		let current = input_slider.value;
-		input_slider.addEventListener('change', (e) => {
+		function onChange(){
 			this.ctx.lineWidth = e.target.value*current;
-
-		});
-		strokeBoxDiv.appendChild(input_slider);
-		this.toolBox.appendChild(strokeBoxDiv);
-		return strokeBoxDiv;
+		}
+		let input_slider = html.range_input('Stroke Size', '1', '10', '1', '1', onChange)
+		this.toolBox.appendChild(input_slider);
+		return input_slider;
 	}
 
 	lineTool(){
-		let svg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
-		  <!-- Point A -->
-		  <circle cx="50" cy="50" r="5" fill="black" />
-		  
-		  <!-- Point B -->
-		  <circle cx="150" cy="150" r="5" fill="black" />
+		let svg = `<svg width="25" height="25" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
+			  <!-- Connecting line -->
+			  <line x1="6" y1="12.5" x2="19" y2="12.5" stroke="black" stroke-width="1.5" />
 
-		  <!-- Dotted Line -->
-		  <line x1="2" y1="2" x2="20" y2="20" 
-			stroke="black" stroke-width="2" 
-			stroke-dasharray="2,5" />
-		</svg>
-		`
+			  <!-- Left dot -->
+			  <circle cx="6" cy="12.5" r="2.5" fill="black" />
+
+			  <!-- Right dot -->
+			  <circle cx="19" cy="12.5" r="2.5" fill="black" />
+			</svg>`
 		const line_button = html.button(svg, 'Line Join');
 		this.toolBox.appendChild(line_button);
 
@@ -1042,17 +1046,12 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 	}
 
 	saveTool(){
-		let square_container = document.createElement('div');
-		const save_button = document.createElement('button');
-		var icon = document.createElement('i');
-		save_button.title = 'Save tool to save current file'
-		icon.className = 'fa fa-save';
-		icon.style.fontSize = '25px';
-
-		icon.style.cursor = 'pointer';
-		save_button.appendChild(icon);
-		square_container.appendChild(save_button);
-		this.toolBox.appendChild(square_container);
+		let svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" width="25px" stroke="currentColor" class="size-6">
+				 <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
+				</svg>
+				`
+		const save_button = html.button(svg, 'Download File');
+		this.toolBox.appendChild(save_button);
 		save_button.addEventListener('click',()=>{
 			let state = JSON.stringify(HISTORY_STACK, null, 2);
 			const blob = new Blob([state], { type: "application/json" });
@@ -1065,11 +1064,15 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 			URL.revokeObjectURL(link.href);
 
 		})
-		return square_container;
+		return save_button;
 	}
 
 
 	openFileTool(){
+		let svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  				<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 0 0-1.883 2.542l.857 6a2.25 2.25 0 0 0 2.227 1.932H19.05a2.25 2.25 0 0 0 2.227-1.932l.857-6a2.25 2.25 0 0 0-1.883-2.542m-16.5 0V6A2.25 2.25 0 0 1 6 3.75h3.879a1.5 1.5 0 0 1 1.06.44l2.122 2.12a1.5 1.5 0 0 0 1.06.44H18A2.25 2.25 0 0 1 20.25 9v.776" />
+			</svg>
+		`
 		let square_container = document.createElement('div');
 		const save_button = document.createElement('input');
 		save_button.type = "file";
@@ -1100,22 +1103,12 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 	}
 
 	opacityTool(){
-		const slider_container = document.createElement('div');
-		const input_slider = document.createElement('input');
-		slider_container.appendChild(input_slider);
-		input_slider.type = 'range';
-		input_slider.id = "slider";
-		input_slider.min = '0.0';
-		input_slider.max = '1.0';
-		input_slider.step = '0.1';
-		input_slider.value = '0.5';
-		slider_container.style.backgroundColor = '#fff';
-
-		this.toolBox.appendChild(slider_container);
-		input_slider.addEventListener('change', (e) => {
+		function onChange(){
 			let opacity = e.target.value;
 			this.canvas.style.opacity = ''+opacity;
-		});
+		}
+		const input_slider = html.range_input('Opacity Tool', '0.0', '1.0', '0.1', '0.5', onChange);
+		this.toolBox.appendChild(input_slider);
 
 	}
 
