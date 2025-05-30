@@ -105,7 +105,7 @@ class HTML {
 		return pen_button;
 	}
 
-	range_input(name, min, max, step='0.1', value='0.5', func){
+	range_input(name, min, max, step='0.1', value='0.5'){
 		const input_slider = document.createElement('input');
 		input_slider.type = 'range';
 		input_slider.id = "slider";
@@ -117,7 +117,6 @@ class HTML {
 		input_slider.style.width = '100%';
 		input_slider.style.height = 'auto';
 		input_slider.style.zIndex = '2';
-		input_slider.addEventListener('change', func); 
 		return input_slider;
 	}
 	
@@ -301,7 +300,8 @@ class ToolBarNew{
 			this.toolBox.style.width = '50px';
 		});
 		this.toolBox.addEventListener('mousedown', (e)=>{
-			e.preventDefault();
+			//e.preventDefault();
+
 			isDragging = true;
 			offsetX = e.clientX - this.toolBox.offsetLeft;
 			offsetY = e.clientY - this.toolBox.offsetTop;
@@ -630,10 +630,11 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	}
 
 	strokeBox(){
-		function onChange(){
+		let input_slider = html.range_input('Stroke Size', '1', '10', '1', '1')
+		let current = input_slider.value
+		input_slider.addEventListener('change', (e)=> {
 			this.ctx.lineWidth = e.target.value*current;
-		}
-		let input_slider = html.range_input('Stroke Size', '1', '10', '1', '1', onChange)
+		});
 		this.toolBox.appendChild(input_slider);
 		return input_slider;
 	}
@@ -1103,11 +1104,12 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 	}
 
 	opacityTool(){
-		function onChange(){
+		const input_slider = html.range_input('Opacity Tool', '0.0', '1.0', '0.1', '0.5');
+		input_slider.addEventListener('change', (e) => {
+			console.log('used')
 			let opacity = e.target.value;
 			this.canvas.style.opacity = ''+opacity;
-		}
-		const input_slider = html.range_input('Opacity Tool', '0.0', '1.0', '0.1', '0.5', onChange);
+		})
 		this.toolBox.appendChild(input_slider);
 
 	}
