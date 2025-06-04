@@ -2,6 +2,38 @@
 //
 //
 //
+// why use debounce function to delay or remove frequent change
+// this deletes prev timer and adds new 
+function debounce(fn, delay) {
+	return function(...args){
+		clearTimeout(timer);
+		timer = setTimeout(() => { fn.apply(this, args)}, delay)
+	};
+}
+
+
+function extendCanvas(event){
+	console.log('this is inside extend Canvas')
+	size = canvas.getBoundingClientRect()
+	console.log(size)
+	console.log(event.clientY, size.height);
+	if (size.width - event.clientX === 80){
+		a+=1;
+		console.log(a)
+		console.log(canvas_element(a,b));
+		render(canvas);
+	}
+	if (size.height - event.clientY < 80){
+		b+=1
+		console.log('this is b ->', b)
+		console.log(canvas_element(a,b));
+		render(canvas)
+	}
+
+	console.log(b)
+
+}
+
 class PriorityQueue{
 	//complete priority ques
 	constructor() {
@@ -71,6 +103,10 @@ class PriorityQueue{
 
 
 class HTML {
+	constructor(isDisplayed){
+		this.isDisplayed = isDisplayed;
+	}
+
 	button(svg, name){
 		const pen_button = document.createElement('button');
 		pen_button.style.cursor = 'pointer';
@@ -91,15 +127,16 @@ class HTML {
 
 		const name_span = document.createElement('span');
 		name_span.innerText = name;
-
+		console.log(this.isDisplayed);
+		name_span.style.display = this.isDisplayed
+		pen_button.appendChild(name_span);
 		pen_button.addEventListener('mouseover', () => { 
 			pen_button.style.background = 'rgba(255,255,255,0.1)';
-
-			pen_button.appendChild(name_span);
+			name_span.style.display = "block";
 		});
 		pen_button.addEventListener('mouseout', () => { 
 			pen_button.style.background = 'transparent';
-			pen_button.removeChild(name_span)
+			name_span.style.display = "none";
 		});
 
 		return pen_button;
@@ -131,7 +168,7 @@ class HTML {
 
 }
 
-const html = new HTML();
+
 
 function distance(x1,y1, x2,y2){
 	return (x2-x1)**2 + (y2-y1)**2;
@@ -194,7 +231,7 @@ const div = document.createElement('div');
 const HISTORY_STACK = [];
 const REDO_STACK = [];
 
-function canvas_element(){
+function canvas_element(a=1,b=1){
 	const canvas = document.createElement('canvas');
 	canvas.id = 'canvasid';
 	canvas.style.backgroundColor = 'rgba(0,0,0,1)';
@@ -203,8 +240,9 @@ function canvas_element(){
 	canvas.style.top = '0';
 	canvas.style.left = '0';
 	canvas.style.zIndex = '9999';
-	canvas.width = document.documentElement.scrollWidth;
-	canvas.height = document.documentElement.scrollHeight;
+	console.log('width -->',document.documentElement.scrollWidth * a, 'height -->', document.documentElement.scrollHeight * b)
+	canvas.width = document.documentElement.scrollWidth * a;
+	canvas.height = document.documentElement.scrollHeight * b;
 	return canvas
 }
 
@@ -213,8 +251,6 @@ function render(canvas){
 	ctx.clearRect(0,0, canvas.width, canvas.height);
 	for (let shape_data of HISTORY_STACK){
 		ctx.lineWidth = shape_data.lineWidth;
-		console.log('rendering ....');
-		console.log(shape_data);
 		switch (shape_data.shape){
 			case "pen":
 				shape_creator["pen"](shape_data.trace, ctx);
@@ -246,7 +282,6 @@ function movement(proximity, x, y){
 			proximity.x1 = x;
 			proximity.y1 = y;
 	}
-
 }
 
 
@@ -259,6 +294,8 @@ page.appendChild(div)
 
 class ToolBarNew{
 	constructor(){
+		this.textInsideToolBar = "none"
+		this.html = new HTML(this.textInsideToolBar);
 		this.toolBox = document.createElement('div');
 		this.corner = document.createElement('div');
 		this.canvas = document.getElementById('canvasid');
@@ -266,6 +303,7 @@ class ToolBarNew{
 		this.globalheight = '25px';
 		this.globalWidth = '25px';
 		this.globalColor = 'rgba(255,255,255,1)';
+
 	}
 
 	outerBox(){
@@ -283,21 +321,21 @@ class ToolBarNew{
 		this.toolBox.style.position = 'absolute';
 		this.toolBox.style.zIndex = '999999';
 		this.toolBox.style.display = 'flex';
-		//this.toolBox.style.justifyContent = 'space-between';
 		this.toolBox.style.top = '0';
 		this.toolBox.style.border = '1px solid';
 		this.toolBox.style.left = "100px";
 		this.toolBox.style.right = "100px";
 		this.toolBox.style.width = '50px';
-		//this.moverBox.appendChild(this.toolBox);
 		let isDragging = false;
 		let offsetX = '500';
 		let offsetY = '500';
 		this.toolBox.addEventListener('mouseover', (e)=>{
 			this.toolBox.style.width = '150px';
+			this.textInsideToolBar = "block"
 		});
 		this.toolBox.addEventListener('mouseout', ()=>{
 			this.toolBox.style.width = '50px';
+			this.textInsideToolBar = "none";
 		});
 		this.toolBox.addEventListener('mousedown', (e)=>{
 			//e.preventDefault();
@@ -319,7 +357,7 @@ class ToolBarNew{
 		});
 		document.addEventListener('mouseup', ()=>{
 			isDragging = false;
-			this.toolBox.style.width = '100px';
+			this.toolBox.style.width = '150px';
 		});
 		return this.toolBox;
 	}
@@ -405,7 +443,7 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 " r="2"></circle></svg>`;
 		let name = 'Pen Tool';
 
-		const pen_button = html.button(svg1, name)//document.createElement('button');
+		const pen_button = this.html.button(svg1, name)//document.createElement('button');
 		pen_button.addEventListener('click',() => {	
 			if (!isActive){
 				isActive = true;
@@ -433,7 +471,7 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 	squareTool(){
 		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-square">
 			<rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>`
-		const square_button = html.button(svg,'Square Tool');
+		const square_button = this.html.button(svg,'Square Tool');
 		this.toolBox.appendChild(square_button);
 		let isActive = false;
 
@@ -488,7 +526,7 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
 e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
 ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
-		const circle_button = html.button(svg, 'Circle Tool');
+		const circle_button = this.html.button(svg, 'Circle Tool');
 		let isDrawing = false;
 		let isActive = false;
 		let lastX = 0;
@@ -572,7 +610,7 @@ ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
 	triangleTool(){
 		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-
 linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>`;
-		const triangle_button = html.button(svg, 'Triangle Tool');
+		const triangle_button = this.html.button(svg, 'Triangle Tool');
 		this.toolBox.appendChild(triangle_button);
 		let isActive = false;
 		let lastX = 0;
@@ -624,13 +662,13 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 		function onChange(e){
 			this.globalColor = e.target.value;
 		}
-		const colorInput = html.color_input(onChange);
+		const colorInput = this.html.color_input(onChange);
 		this.toolBox.appendChild(colorInput);
 		return colorInput;
 	}
 
 	strokeBox(){
-		let input_slider = html.range_input('Stroke Size', '1', '10', '1', '1')
+		let input_slider = this.html.range_input('Stroke Size', '1', '10', '1', '1')
 		let current = input_slider.value
 		input_slider.addEventListener('change', (e)=> {
 			this.ctx.lineWidth = e.target.value*current;
@@ -650,7 +688,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 			  <!-- Right dot -->
 			  <circle cx="19" cy="12.5" r="2.5" fill="black" />
 			</svg>`
-		const line_button = html.button(svg, 'Line Join');
+		const line_button = this.html.button(svg, 'Line Join');
 		this.toolBox.appendChild(line_button);
 
 		let lineToolActive = false;
@@ -838,7 +876,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
         c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3C-923,1101.6-920.1,1104.4-920.1,1107.9z M-869.6,1107.9c0,3.4-2.9,6.3-6.3,6.3
         c-3.5,0-6.3-2.9-6.3-6.3c0-3.5,2.8-6.3,6.3-6.3C-872.6,1101.6-869.6,1104.4-869.6,1107.9z"/>
 </svg>` 
-		const eraser_button = html.button(svg, 'Eraser Tool');
+		const eraser_button = this.html.button(svg, 'Eraser Tool');
 		let area = 20;
 		let isErasing = false;
 		this.toolBox.appendChild(eraser_button);
@@ -869,7 +907,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
 ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"></path
 ><path d="M13 13l6 6"></path></svg>`;
-		const selection_button = html.button(svg, 'Selection Tool');
+		const selection_button = this.html.button(svg, 'Selection Tool');
 		let isSelecting = false;
 		this.toolBox.appendChild(selection_button);
 		selection_button.addEventListener('click',(e)=>{
@@ -918,7 +956,7 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 
 	textTool(){
 		let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-type"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>`;
-		const text_button = html.button(svg, 'Text Tool');
+		const text_button = this.html.button(svg, 'Text Tool');
 		let isActive = false;
 		let initialX = 0;
 		let initialY = 0;
@@ -990,7 +1028,7 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 			12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 
 			22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2=
 			"12" y2="22"></line></svg>`;
-		const move_button = html.button(svg, 'Move Tool');
+		const move_button = this.html.button(svg, 'Move Tool');
 
 		this.toolBox.appendChild(move_button);
 		move_button.addEventListener('click',()=>{
@@ -1051,7 +1089,7 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 				 <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 7.5h-.75A2.25 2.25 0 0 0 4.5 9.75v7.5a2.25 2.25 0 0 0 2.25 2.25h7.5a2.25 2.25 0 0 0 2.25-2.25v-7.5a2.25 2.25 0 0 0-2.25-2.25h-.75m-6 3.75 3 3m0 0 3-3m-3 3V1.5m6 9h.75a2.25 2.25 0 0 1 2.25 2.25v7.5a2.25 2.25 0 0 1-2.25 2.25h-7.5a2.25 2.25 0 0 1-2.25-2.25v-.75" />
 				</svg>
 				`
-		const save_button = html.button(svg, 'Download File');
+		const save_button = this.html.button(svg, 'Download File');
 		this.toolBox.appendChild(save_button);
 		save_button.addEventListener('click',()=>{
 			let state = JSON.stringify(HISTORY_STACK, null, 2);
@@ -1104,7 +1142,7 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 	}
 
 	opacityTool(){
-		const input_slider = html.range_input('Opacity Tool', '0.0', '1.0', '0.1', '0.5');
+		const input_slider = this.html.range_input('Opacity Tool', '0.0', '1.0', '0.1', '0.5');
 		input_slider.addEventListener('change', (e) => {
 			console.log('used')
 			let opacity = e.target.value;
@@ -1155,18 +1193,29 @@ document.addEventListener('keydown', (event)=>{
 
 // mouse event
 
+let a = 1;
+let b = 1;
+let timer;
+
+
+
+
+
 let debug_position = document.getElementById('position-debug');
+let debounce_input = debounce(extendCanvas,500)
+canvas.addEventListener('mousemove', debounce_input);
+
 document.addEventListener('mousemove', (event)=>{
+	//let canvas = document.getElementById('canvasid');
 	debug_position = document.getElementById('position-debug');
+
 	if (debug_position){
 		debug_position.style.left = `${event.clientX+10}px`;
 		debug_position.style.top = `${event.clientY+10}px`;
 		debug_position.innerText = `x: ${event.clientX}, y: ${event.clientY}`;
 	}
-
-
 });
-
+ 
 
 let tool_box = new ToolBarNew();
 tool_box.penTool();

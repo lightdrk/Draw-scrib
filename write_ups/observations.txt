@@ -113,4 +113,6 @@ observation:- i am using getting the mid from the top of rect or square to get d
 	2). also happening with line to tool.
 	3) RESOLVED --> issue was because i was not adding this.globalColor to the ctx causing the issue  (: |)
 
-
+18). adding feature of increasing the size of canvas when mouse moves near the edge and stays for some ms , 
+	1) issue is that i am increasing the size but it does not changes need to look into it 
+	2) used debounce function for this.
