@@ -7,31 +7,23 @@
 function debounce(fn, delay) {
 	return function(...args){
 		clearTimeout(timer);
-		timer = setTimeout(() => { fn.apply(this, args)}, delay)
+		timer = setTimeout(() => { fn.apply(this, args)}, 0)
 	};
 }
 
 
 function extendCanvas(event){
-	console.log('this is inside extend Canvas')
 	size = canvas.getBoundingClientRect()
-	console.log(size)
-	console.log(event.clientY, size.height);
-	if (size.width - event.clientX === 80){
+	if (size.width - event.clientX < 80){
 		a+=1;
-		console.log(a)
-		console.log(canvas_element(a,b));
+		canvas.width = window.innerWidth * a;
 		render(canvas);
 	}
 	if (size.height - event.clientY < 80){
 		b+=1
-		console.log('this is b ->', b)
-		console.log(canvas_element(a,b));
+		canvas.height = window.innerHeight * b;
 		render(canvas)
 	}
-
-	console.log(b)
-
 }
 
 class PriorityQueue{
@@ -126,17 +118,16 @@ class HTML {
 		pen_button.innerHTML+=svg
 
 		const name_span = document.createElement('span');
+		name_span.classList.add('show');
 		name_span.innerText = name;
 		console.log(this.isDisplayed);
 		name_span.style.display = this.isDisplayed
 		pen_button.appendChild(name_span);
 		pen_button.addEventListener('mouseover', () => { 
 			pen_button.style.background = 'rgba(255,255,255,0.1)';
-			name_span.style.display = "block";
 		});
 		pen_button.addEventListener('mouseout', () => { 
 			pen_button.style.background = 'transparent';
-			name_span.style.display = "none";
 		});
 
 		return pen_button;
@@ -231,7 +222,7 @@ const div = document.createElement('div');
 const HISTORY_STACK = [];
 const REDO_STACK = [];
 
-function canvas_element(a=1,b=1){
+function canvas_element(){
 	const canvas = document.createElement('canvas');
 	canvas.id = 'canvasid';
 	canvas.style.backgroundColor = 'rgba(0,0,0,1)';
@@ -240,9 +231,9 @@ function canvas_element(a=1,b=1){
 	canvas.style.top = '0';
 	canvas.style.left = '0';
 	canvas.style.zIndex = '9999';
-	console.log('width -->',document.documentElement.scrollWidth * a, 'height -->', document.documentElement.scrollHeight * b)
-	canvas.width = document.documentElement.scrollWidth * a;
-	canvas.height = document.documentElement.scrollHeight * b;
+	canvas.width = document.documentElement.scrollWidth ;
+	canvas.height = document.documentElement.scrollHeight ;
+	canvas.style.overflow = scroll;
 	return canvas
 }
 
@@ -332,10 +323,17 @@ class ToolBarNew{
 		this.toolBox.addEventListener('mouseover', (e)=>{
 			this.toolBox.style.width = '150px';
 			this.textInsideToolBar = "block"
+			console.log(document.getElementsByClassName('show'))
+			document.querySelectorAll('.show').forEach((el)=> {
+				el.style.display = 'block'
+			});
 		});
 		this.toolBox.addEventListener('mouseout', ()=>{
 			this.toolBox.style.width = '50px';
 			this.textInsideToolBar = "none";
+			document.querySelectorAll('.show').forEach((el)=> {
+				el.style.display = 'none';
+			});
 		});
 		this.toolBox.addEventListener('mousedown', (e)=>{
 			//e.preventDefault();
@@ -523,9 +521,7 @@ ss="feather feather-pen-tool"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="
 
 
 	circleTool(){
-		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="non
-e" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" cla
-ss="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
+		let svg =`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-circle"><circle cx="12" cy="12" r="10"></circle></svg>`;
 		const circle_button = this.html.button(svg, 'Circle Tool');
 		let isDrawing = false;
 		let isActive = false;
@@ -680,13 +676,13 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	lineTool(){
 		let svg = `<svg width="25" height="25" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
 			  <!-- Connecting line -->
-			  <line x1="6" y1="12.5" x2="19" y2="12.5" stroke="black" stroke-width="1.5" />
+			  <line x1="4" y1="12.5" x2="19" y2="12.5" stroke="white" stroke-width="1.5" />
 
 			  <!-- Left dot -->
-			  <circle cx="6" cy="12.5" r="2.5" fill="black" />
+			  <circle cx="6" cy="12.5" r="2.5" fill="white" />
 
 			  <!-- Right dot -->
-			  <circle cx="19" cy="12.5" r="2.5" fill="black" />
+			  <circle cx="19" cy="12.5" r="2.5" fill="white" />
 			</svg>`
 		const line_button = this.html.button(svg, 'Line Join');
 		this.toolBox.appendChild(line_button);
@@ -861,7 +857,7 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	}
 
 	eraserTool(){
-		let svg = `<svg fill="#000000" height="25px" width="25px" version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+		let svg = `<svg fill="white" height="25px" width="25px" version="1.2" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
           viewBox="-1117 883 256 256" xml:space="preserve">
 <path d="M-1016.4,1091.3l113.9-113.9c13.5-13.5,13.5-35.3,0-48.8l-32.5-32.5c-13.5-13.5-35.3-13.5-48.8,0l-113.9,113.9
         c-13.5,13.5-13.5,35.3,0,48.8l32.5,32.5C-1051.7,1104.8-1029.9,1104.8-1016.4,1091.3z M-1057.1,1083.2l-32.5-32.5
@@ -1198,12 +1194,12 @@ let b = 1;
 let timer;
 
 
-
-
-
 let debug_position = document.getElementById('position-debug');
-let debounce_input = debounce(extendCanvas,500)
-canvas.addEventListener('mousemove', debounce_input);
+canvas.addEventListener('mousemove', (e)=>{
+	console.log('lets do this')
+	//setTimeout(()=>{},500);
+	extendCanvas(e)
+});
 
 document.addEventListener('mousemove', (event)=>{
 	//let canvas = document.getElementById('canvasid');
