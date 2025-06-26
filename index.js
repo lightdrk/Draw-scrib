@@ -14,6 +14,12 @@ function debounce(fn, delay) {
 
 function extendCanvas(event){
 	size = canvas.getBoundingClientRect()
+	a+=1;
+	b+=1;
+	canvas.width = window.innerWidth * a;
+	canvas.height = window.innerHeight * b;
+	render(canvas)
+	/*
 	if (size.width - event.clientX < 80){
 		a+=1;
 		canvas.width = window.innerWidth * a;
@@ -24,6 +30,7 @@ function extendCanvas(event){
 		canvas.height = window.innerHeight * b;
 		render(canvas)
 	}
+		*/
 }
 
 class PriorityQueue{
@@ -148,11 +155,10 @@ class HTML {
 		return input_slider;
 	}
 	
-	color_input(func){
+	color_input(){
 		const colorInput = document.createElement('input');
 		colorInput.id = "color-picker"
 		colorInput.setAttribute('type', 'color');
-		colorInput.addEventListener('input', func);
 		return colorInput;
 	}
 
@@ -655,11 +661,11 @@ linejoin="round" class="feather feather-triangle"><path d="M10.29 3.86L1.82 18a2
 	}
 
 	colorBox(){
-		function onChange(e){
-			this.globalColor = e.target.value;
-		}
-		const colorInput = this.html.color_input(onChange);
+		const colorInput = this.html.color_input();
 		this.toolBox.appendChild(colorInput);
+		colorInput.addEventListener('input',(e)=>{
+			this.globalColor = e.target.value;
+		})
 		return colorInput;
 	}
 
@@ -1098,10 +1104,21 @@ ss="feather feather-mouse-pointer"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L
 			document.body.removeChild(link);
 			URL.revokeObjectURL(link.href);
 
-		})
+		});
 		return save_button;
 	}
 
+	increaseTool(){
+		let svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" width="25" height="25" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+					</svg>`;
+		const i_button = this.html.button(svg, 'Size Increase');
+		this.toolBox.appendChild(i_button);
+		i_button.addEventListener('click', (e)=>{
+			extendCanvas(e)
+		});
+		return i_button
+	}
 
 	openFileTool(){
 		let svg = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -1195,11 +1212,11 @@ let timer;
 
 
 let debug_position = document.getElementById('position-debug');
-canvas.addEventListener('mousemove', (e)=>{
-	console.log('lets do this')
-	//setTimeout(()=>{},500);
-	extendCanvas(e)
-});
+//canvas.addEventListener('mousemove', (e)=>{
+//	console.log('lets do this')
+//	//setTimeout(()=>{},500);
+//	extendCanvas(e)
+//});
 
 document.addEventListener('mousemove', (event)=>{
 	//let canvas = document.getElementById('canvasid');
@@ -1225,11 +1242,13 @@ tool_box.saveTool();
 tool_box.openFileTool();
 tool_box.eraserTool();
 tool_box.lineTool();
+tool_box.increaseTool();
 //tool_box.arrowsTool();
 //tool_box.arrowsVTool();
 tool_box.textTool();
 tool_box.selectionTool();
 tool_box.strokeBox();
+
 div.appendChild(tool_box.outerBox());
 tool_box.opacityTool();
 
